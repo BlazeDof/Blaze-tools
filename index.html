@@ -1179,11 +1179,29 @@ function saveWeekRecap(offset) {
 }
 
 function deleteWeek(key) {
-  try { localStorage.removeItem(key); } catch(e) {}
+  try {
+    localStorage.removeItem(key);
+    // Supprimer aussi les prix/vendus/mises en vente de cette semaine
+    var toDelete = [];
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i);
+      if (k && (k === 'alm_tp' || k === 'alm_td')) continue;
+      if (k && k.indexOf('alm_') === 0) toDelete.push(k);
+    }
+    // Nettoyer tPrices des entrées liées à cette semaine
+    // On remet tPrices à vide pour cette semaine
+    var weekDate = key.replace('week_', '');
+    Object.keys(tPrices).forEach(function(k) {
+      delete tPrices[k];
+    });
+    saveTp();
+  } catch(e) {}
   renderHistoryPanel();
   var panel = document.getElementById('historyPanel');
   if (panel) panel.style.display = 'block';
   historyOpen = true;
+  // Rerendre la vue trading si active
+  if (viewMode === 'trading') renderTrading();
 }
 
 function renderHistoryPanel() {

@@ -1177,6 +1177,11 @@ function saveWeekRecap(offset) {
   try { localStorage.setItem(key, JSON.stringify(weekData)); } catch(e) {}
 }
 
+function deleteWeek(key) {
+  try { localStorage.removeItem(key); } catch(e) {}
+  renderHistoryPanel();
+}
+
 function renderHistoryPanel() {
   var list = document.getElementById('historyList');
   if (!list) return;
@@ -1201,7 +1206,8 @@ function renderHistoryPanel() {
     return '<div style="display:flex;align-items:center;gap:1rem;padding:.5rem .6rem;background:var(--surface0);border-radius:var(--radius-sm);margin-bottom:4px;">'
       + '<div style="font-size:.78rem;color:var(--subtext1);min-width:160px;">' + d.label + '</div>'
       + '<div class="tmargin ' + cls + '" style="font-size:.82rem;">' + (d.gain > 0 ? '+' : '') + fmtK(d.gain) + ' k</div>'
-      + '<div style="font-size:.72rem;color:var(--overlay0);">' + fmtK(d.sold) + ' vendus</div>'
+      + '<div style="font-size:.72rem;color:var(--overlay0);flex:1;">' + fmtK(d.sold) + ' vendus</div>'
+      + '<button onclick="deleteWeek('' + w.key + '')" style="background:none;border:none;color:var(--overlay0);cursor:pointer;font-size:.9rem;padding:2px 6px;border-radius:var(--radius-sm);transition:all .15s;" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--overlay0)'">&#10005;</button>'
       + '</div>';
   }).join('');
 }

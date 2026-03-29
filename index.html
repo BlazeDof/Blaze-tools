@@ -1420,33 +1420,61 @@ function renderTRank(){
   }).join('');
 }
 
-function renderTRuns(){
+function updateTRunRow(i){
+  var r=tRuns[i];
+  var gained=(r.d!=null&&r.f!=null)?r.f-r.d:null;
+  var wp=gained!=null?(gained/T_TICKETS_RUN/T_WIN_TROOL)*100:null;
+  var vs=wp!=null?wp-25:null;
+  var bp=wp!=null?Math.min(wp/50*100,100):0;
+  var ref=Math.min(25/50*100,100);
+  var row=document.getElementById('trun-row-'+i);
+  if(!row)return;
+  row.querySelector('.trun-gained').textContent=gained!=null?fmtK(gained):'—';
+  row.querySelector('.trun-gained').style.color=gained!=null?'var(--green)':'';
+  row.querySelector('.trun-wp').textContent=wp!=null?wp.toFixed(1)+'%':'—';
+  var vsEl=row.querySelector('.trun-vs');
+  vsEl.textContent=vs!=null?(vs>=0?'+':'')+vs.toFixed(1)+'%':'—';
+  vsEl.className='trun-vs '+(vs!=null?(vs>=0?'pos':'neg'):'');
+  var barEl=row.querySelector('.trun-bar');
+  barEl.innerHTML=bp?'<div class="twin-bar"><div class="twin-fill" style="width:'+bp+'%"></div><div class="twin-ref" style="left:'+ref+'%"></div></div>':'';
+  updateTRunSum();
+}
+
+function updateTRunSum(){
   var totalG=0,totalR=0,totalW=0;
-  var html='';
-  tRuns.forEach(function(r,i){
+  tRuns.forEach(function(r){
     var gained=(r.d!=null&&r.f!=null)?r.f-r.d:null;
     var wp=gained!=null?(gained/T_TICKETS_RUN/T_WIN_TROOL)*100:null;
-    var vs=wp!=null?wp-25:null;
-    var bp=wp!=null?Math.min(wp/50*100,100):0;
-    var ref=Math.min(25/50*100,100);
     if(gained!=null){totalG+=gained;totalR++;totalW+=(wp||0);}
-    html+='<div class="trun-row">'
-      +'<div style="color:var(--mauve);font-weight:600">Run '+(i+1)+'</div>'
-      +'<div><input class="tri" type="number" placeholder="Début" value="'+(r.d!=null?r.d:'')+'" oninput="tRuns['+i+'].d=this.value!==\'\'?parseFloat(this.value):null;saveTI();renderTRuns()"></div>'
-      +'<div><input class="tri" type="number" placeholder="Fin" value="'+(r.f!=null?r.f:'')+'" oninput="tRuns['+i+'].f=this.value!==\'\'?parseFloat(this.value):null;saveTI();renderTRuns()"></div>'
-      +'<div style="color:var(--green)">'+(gained!=null?fmtK(gained):'—')+'</div>'
-      +'<div style="color:var(--yellow)">'+(wp!=null?wp.toFixed(1)+'%':'—')+'</div>'
-      +'<div class="'+(vs!=null?(vs>=0?'pos':'neg'):'')+'">'+(vs!=null?(vs>=0?'+':'')+vs.toFixed(1)+'%':'—')+'</div>'
-      +'<div>'+(bp?'<div class="twin-bar"><div class="twin-fill" style="width:'+bp+'%"></div><div class="twin-ref" style="left:'+ref+'%"></div></div>':'')+'</div>'
-      +'</div>';
   });
-  document.getElementById('tRunsBody').innerHTML=html;
   var avg=totalR>0?totalW/totalR:0;
   document.getElementById('tRunSum').innerHTML=totalR===0?'':
     '<div class="tstat"><div class="tstat-v" style="color:var(--blue)">'+totalR+'</div><div class="tstat-l">Runs</div></div>'
     +'<div class="tstat"><div class="tstat-v" style="color:var(--green)">'+fmtK(totalG)+'</div><div class="tstat-l">Troolatons totaux</div></div>'
     +'<div class="tstat"><div class="tstat-v '+(avg>=25?'pos':'neg')+'">'+avg.toFixed(1)+'%</div><div class="tstat-l">% win moyen</div></div>'
     +'<div class="tstat"><div class="tstat-v '+(avg-25>=0?'pos':'neg')+'">'+(avg-25>=0?'+':'')+( avg-25).toFixed(1)+'%</div><div class="tstat-l">vs théorique</div></div>';
+}
+
+function renderTRuns(){
+  var html='';
+  var ref=Math.min(25/50*100,100);
+  tRuns.forEach(function(r,i){
+    var gained=(r.d!=null&&r.f!=null)?r.f-r.d:null;
+    var wp=gained!=null?(gained/T_TICKETS_RUN/T_WIN_TROOL)*100:null;
+    var vs=wp!=null?wp-25:null;
+    var bp=wp!=null?Math.min(wp/50*100,100):0;
+    html+='<div class="trun-row" id="trun-row-'+i+'">'
+      +'<div style="color:var(--mauve);font-weight:600">Run '+(i+1)+'</div>'
+      +'<div><input class="tri" type="number" placeholder="Début" value="'+(r.d!=null?r.d:'')+'" oninput="tRuns['+i+'].d=this.value!==\'\'?parseFloat(this.value):null;saveTI();updateTRunRow('+i+')"></div>'
+      +'<div><input class="tri" type="number" placeholder="Fin" value="'+(r.f!=null?r.f:'')+'" oninput="tRuns['+i+'].f=this.value!==\'\'?parseFloat(this.value):null;saveTI();updateTRunRow('+i+')"></div>'
+      +'<div class="trun-gained" style="color:'+(gained!=null?'var(--green)':'')+'">'+( gained!=null?fmtK(gained):'—')+'</div>'
+      +'<div class="trun-wp" style="color:var(--yellow)">'+(wp!=null?wp.toFixed(1)+'%':'—')+'</div>'
+      +'<div class="trun-vs '+(vs!=null?(vs>=0?'pos':'neg'):'')+'">'+(vs!=null?(vs>=0?'+':'')+vs.toFixed(1)+'%':'—')+'</div>'
+      +'<div class="trun-bar">'+(bp?'<div class="twin-bar"><div class="twin-fill" style="width:'+bp+'%"></div><div class="twin-ref" style="left:'+ref+'%"></div></div>':'')+'</div>'
+      +'</div>';
+  });
+  document.getElementById('tRunsBody').innerHTML=html;
+  updateTRunSum();
 }
 
 function showTTab(t){

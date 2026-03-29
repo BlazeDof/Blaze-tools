@@ -1343,6 +1343,9 @@ function tBadge(score,rank){
   return['var(--mantle)','rgba(243,139,168,.5)','Éviter'];
 }
 
+function fmtTei(n){ return Math.round(n).toLocaleString('fr-FR'); }
+function parseTei(s){ return parseFloat((s+'').replace(/\s/g,'').replace(/,/g,'.')) || 0; }
+
 function renderTItems(){
   var cs=tCalcScores();
   var sorted=[].concat(cs).sort(function(a,b){return b.score-a.score;});
@@ -1354,8 +1357,8 @@ function renderTItems(){
     var b=tBadge(c.score,isBest?0:99);
     return '<tr'+(isBest?' class="tbest"':'')+'>'
       +'<td style="font-weight:'+(isBest?600:400)+'">'+c.item.name+'</td>'
-      +'<td><input class="tei" type="number" data-id="kamas_'+i+'" value="'+Math.round(c.item.kamas/1000)+'" oninput="tItems['+i+'].kamas=this.value*1000;saveTI();refreshTScores()"></td>'
-      +'<td><input class="tei" type="number" data-id="ventes_'+i+'" value="'+c.item.ventes+'" oninput="tItems['+i+'].ventes=parseFloat(this.value)||0;saveTI();refreshTScores()"></td>'
+      +'<td><input class="tei" type="text" inputmode="numeric" data-id="kamas_'+i+'" value="'+fmtTei(c.item.kamas)+'" onfocus="this.value=parseTei(this.value)||this.value" onblur="tItems['+i+'].kamas=parseTei(this.value);saveTI();refreshTScores();this.value=fmtTei(tItems['+i+'].kamas)"></td>'
+      +'<td><input class="tei" type="text" inputmode="numeric" data-id="ventes_'+i+'" value="'+fmtTei(c.item.ventes)+'" onfocus="this.value=parseTei(this.value)||this.value" onblur="tItems['+i+'].ventes=parseTei(this.value);saveTI();refreshTScores();this.value=fmtTei(tItems['+i+'].ventes)"></td>'
       +'<td class="'+(c.benef>=0?'pos':'neg')+'" id="tbenef_'+i+'">'+(c.benef>=0?'+':'')+fmtK(c.benef/1000)+' k</td>'
       +'<td id="tscore_'+i+'"><div style="font-size:.82rem;font-weight:600">'+c.score+'/100</div>'
       +'<div class="tbar"><div class="tbar-fill" style="width:'+c.score+'%;background:var(--mauve)"></div></div></td>'

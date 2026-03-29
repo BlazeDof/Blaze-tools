@@ -378,7 +378,9 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
     </div>
   </div>
   <div class="hdr-right">
-    <button class="nbtn-hdr" onclick="exportData()" title="Télécharger une sauvegarde de toutes tes données">💾 Export</button>
+    <span id="saveStatus" style="font-size:.68rem;font-weight:600;min-width:80px;text-align:right;"></span>
+    <button class="nbtn-hdr" onclick="linkSaveFile()" title="Lier un fichier pour la sauvegarde automatique">📁 Lier</button>
+    <button class="nbtn-hdr" onclick="exportData()" title="Télécharger une sauvegarde manuelle">💾 Export</button>
     <label class="nbtn-hdr" title="Restaurer depuis une sauvegarde" style="cursor:pointer;">
       📂 Import<input type="file" accept=".json" onchange="importData(event)" style="display:none;">
     </label>
@@ -534,7 +536,7 @@ var cache={}, notif=false, listData=[], skipScroll=false;
 var myList={};
 try{var sv=JSON.parse(localStorage.getItem('alm_mylist')||'[]');for(var i=0;i<sv.length;i++)myList[sv[i]]=true;}catch(e){}
 
-function saveMyList(){try{localStorage.setItem('alm_mylist',JSON.stringify(Object.keys(myList)));}catch(e){}}
+function saveMyList(){try{localStorage.setItem('alm_mylist',JSON.stringify(Object.keys(myList)));}catch(e){}triggerAutoSave();}
 function inML(ds){return !!myList[ds];}
 function pad(n){return n<10?'0'+n:''+n;}
 function fmtK(n){return Math.round(n).toLocaleString('fr-FR');}
@@ -894,7 +896,7 @@ function toggleNotif(){
   if(notif){notif=false;try{localStorage.removeItem('alm_n');}catch(e){}updateNBtn();toast('Rappel désactivé');return;}
   Notification.requestPermission().then(function(p){
     if(p==='granted'){
-      notif=true;try{localStorage.setItem('alm_n','1');}catch(e){}updateNBtn();toast('Rappel activé !');
+      notif=true;try{localStorage.setItem('alm_n','1');}catch(e){}updateNBtn();toast('Rappel activé !');triggerAutoSave();
       fetchDay(fmt(tod)).then(function(data){
         if(!data)return;
         new Notification('Almanax — Offrande du jour',{
@@ -933,8 +935,8 @@ var tPrices = {};
 var tDone = {};
 try { tPrices = JSON.parse(localStorage.getItem('alm_tp') || '{}'); } catch(e) {}
 try { tDone = JSON.parse(localStorage.getItem('alm_td') || '{}'); } catch(e) {}
-function saveTp() { try { localStorage.setItem('alm_tp', JSON.stringify(tPrices)); } catch(e) {} }
-function saveTd() { try { localStorage.setItem('alm_td', JSON.stringify(tDone)); } catch(e) {} }
+function saveTp() { try { localStorage.setItem('alm_tp', JSON.stringify(tPrices)); } catch(e) {} triggerAutoSave(); }
+function saveTd() { try { localStorage.setItem('alm_td', JSON.stringify(tDone)); } catch(e) {} triggerAutoSave(); }
 
 function getWeekBounds(offset) {
   // Lundi de la semaine courante
@@ -1180,7 +1182,7 @@ function saveWeekRecap(offset) {
     listed: totalListed
   };
   try { localStorage.setItem(key, JSON.stringify(weekData)); } catch(e) {}
-}
+  triggerAutoSave();
 
 function deleteWeek(key) {
   try {
@@ -1252,7 +1254,7 @@ var tItems=[
 var tRuns=[{d:null,f:null},{d:null,f:null},{d:null,f:null},{d:null,f:null},{d:null,f:null}];
 var tSimSales={};
 try{var sv=localStorage.getItem('alm_ti');if(sv){var p=JSON.parse(sv);tItems=p.items||tItems;tRuns=p.runs||tRuns;}}catch(e){}
-function saveTI(){try{localStorage.setItem('alm_ti',JSON.stringify({items:tItems,runs:tRuns}));}catch(e){}}
+function saveTI(){try{localStorage.setItem('alm_ti',JSON.stringify({items:tItems,runs:tRuns}));}catch(e){}triggerAutoSave();}
 
 function tCalcScores(){
   var cs=tItems.map(function(it){
@@ -1465,8 +1467,55 @@ document.addEventListener('click', function(e) {
   }
 });
 
-/* ── Export / Import ────────────────────────────── */
+/* ── Export / Import / Autosave ─────────────────── */
 var SAVE_KEYS = ['alm_mylist','alm_n','alm_td','alm_ti','alm_tp'];
+var _fsHandle = null, _fsDebounce = null, _fsSaving = false;
+
+function _buildSavePayload(){
+  var save = { version: 1, date: new Date().toISOString(), data: {} };
+  SAVE_KEYS.forEach(function(k){ var v=localStorage.getItem(k); if(v!==null) save.data[k]=v; });
+  return JSON.stringify(save, null, 2);
+}
+
+function _setSaveStatus(s){
+  var el = document.getElementById('saveStatus');
+  if(!el) return;
+  if(s==='ok')      { el.textContent='✅ Sauvegardé'; el.style.color='var(--green)'; }
+  else if(s==='saving') { el.textContent='🔄...'; el.style.color='var(--yellow)'; }
+  else if(s==='err')    { el.textContent='❌ Erreur'; el.style.color='var(--red)'; }
+  else if(s==='linked') { el.textContent='📁 Lié'; el.style.color='var(--blue)'; }
+}
+
+async function linkSaveFile(){
+  try {
+    if(!window.showSaveFilePicker){ toast('❌ Non supporté (utilise Chrome/Edge)'); return; }
+    _fsHandle = await window.showSaveFilePicker({
+      suggestedName: 'blaze-tools-save.json',
+      types: [{ description: 'JSON', accept: { 'application/json': ['.json'] } }]
+    });
+    _setSaveStatus('linked');
+    toast('📁 Fichier lié — sauvegarde auto activée !');
+    await _writeToFile();
+  } catch(e) { if(e.name!=='AbortError') toast('❌ Erreur : '+e.message); }
+}
+
+async function _writeToFile(){
+  if(!_fsHandle || _fsSaving) return;
+  _fsSaving = true; _setSaveStatus('saving');
+  try {
+    var writable = await _fsHandle.createWritable();
+    await writable.write(_buildSavePayload());
+    await writable.close();
+    _setSaveStatus('ok');
+  } catch(e) { _setSaveStatus('err'); toast('❌ Sauvegarde échouée : '+e.message); }
+  _fsSaving = false;
+}
+
+function triggerAutoSave(){
+  if(!_fsHandle) return;
+  clearTimeout(_fsDebounce);
+  _fsDebounce = setTimeout(_writeToFile, 600);
+}
 
 function exportData(){
   try {

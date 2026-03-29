@@ -1973,7 +1973,6 @@ function buildOcreView(){
     +'<input class="ocre-search sinput" placeholder="Rechercher un monstre..." oninput="ocreSearch=this.value;buildOcreView()" value="'+ocreSearch+'"></div>'
     +'<div class="ocre-filters">'
     +'<div class="ocre-chip'+(ocreFilter==='all'?' on':'')+'" onclick="ocreFilter=\'all\';buildOcreView()">Tous ('+s.total+')</div>'
-    +'<div class="ocre-chip'+(ocreFilter==='monstre'?' on':'')+'" onclick="ocreFilter=\'monstre\';buildOcreView()" style="'+(ocreFilter==='monstre'?'background:rgba(137,180,250,.8);color:var(--mantle)':'')+'">🐾 Monstres ('+s.normal+')</div>'
     +'<div class="ocre-chip'+(ocreFilter==='archimonstre'?' on':'')+'" onclick="ocreFilter=\'archimonstre\';buildOcreView()" style="'+(ocreFilter==='archimonstre'?'background:rgba(203,166,247,.8);color:var(--mantle)':'')+'">⚡ Archis ('+s.archis+')</div>'
     +'<div class="ocre-chip'+(ocreFilter==='boss'?' on':'')+'" onclick="ocreFilter=\'boss\';buildOcreView()" style="'+(ocreFilter==='boss'?'background:rgba(243,139,168,.8);color:var(--mantle)':'')+'">💀 Boss ('+s.boss+')</div>'
     +'</div>'
@@ -1989,9 +1988,8 @@ function buildOcreView(){
     +'</div>';
 
   // Stats
-  html += '<div class="ocre-stats">'
+  html += '<div class="ocre-stats" style="grid-template-columns:repeat(3,1fr)">'
     +'<div class="ocre-stat"><div class="ocre-stat-v" style="color:var(--mauve)">'+pct+'%</div><div class="ocre-stat-l">Progression</div></div>'
-    +'<div class="ocre-stat"><div class="ocre-stat-v" style="color:var(--blue)">'+s.normalCapt+' / '+s.normal+'</div><div class="ocre-stat-l">🐾 Monstres</div></div>'
     +'<div class="ocre-stat"><div class="ocre-stat-v" style="color:var(--mauve)">'+s.archisCapt+' / '+s.archis+'</div><div class="ocre-stat-l">⚡ Archimonstres</div></div>'
     +'<div class="ocre-stat"><div class="ocre-stat-v" style="color:var(--red)">'+s.bossCapt+' / '+s.boss+'</div><div class="ocre-stat-l">💀 Boss</div></div>'
     +'</div>';

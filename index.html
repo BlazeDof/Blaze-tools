@@ -303,7 +303,31 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
 .trecap-val { font-size:1.1rem; font-weight:700; }
 .trecap-lbl { font-size:.6rem; color:var(--overlay0); text-transform:uppercase; letter-spacing:.08em; }
 
-/* ── Récap mensuel ───────────────────────────────── */
+/* ── Bloc-note ───────────────────────────────────── */
+.notes-layout { display:grid; grid-template-columns:220px 1fr; gap:12px; height:calc(100vh - 54px - 2.4rem); }
+.notes-sidebar { display:flex; flex-direction:column; gap:6px; }
+.notes-new-btn { background:var(--mauve); border:none; color:var(--mantle); padding:.5rem .8rem; border-radius:var(--radius-sm); font-size:.78rem; font-weight:600; cursor:pointer; font-family:'Inter',sans-serif; transition:all .15s; display:flex; align-items:center; gap:.4rem; justify-content:center; }
+.notes-new-btn:hover { background:var(--lavender); }
+.notes-list { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:4px; }
+.notes-list::-webkit-scrollbar { width:4px; }
+.notes-list::-webkit-scrollbar-thumb { background:var(--surface1); border-radius:2px; }
+.note-item { background:var(--surface0); border-radius:var(--radius-sm); padding:.55rem .75rem; cursor:pointer; border:1.5px solid transparent; transition:all .15s; }
+.note-item:hover { background:var(--surface1); }
+.note-item.active { border-color:var(--mauve); background:var(--surface1); }
+.note-item-title { font-size:.78rem; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.note-item-preview { font-size:.65rem; color:var(--overlay1); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px; }
+.note-item-date { font-size:.58rem; color:var(--overlay0); margin-top:3px; }
+.notes-editor { display:flex; flex-direction:column; gap:8px; min-height:0; }
+.notes-editor-top { display:flex; align-items:center; gap:8px; }
+.notes-title-input { flex:1; background:var(--surface0); border:1.5px solid var(--surface1); color:var(--text); padding:.5rem .8rem; border-radius:var(--radius-sm); font-size:.95rem; font-weight:600; outline:none; font-family:'Inter',sans-serif; }
+.notes-title-input:focus { border-color:var(--mauve); }
+.notes-delete-btn { background:none; border:1.5px solid var(--surface2); color:var(--overlay0); padding:.4rem .7rem; border-radius:var(--radius-sm); cursor:pointer; font-size:.72rem; font-family:'Inter',sans-serif; transition:all .15s; }
+.notes-delete-btn:hover { border-color:var(--red); color:var(--red); }
+.notes-textarea { flex:1; background:var(--surface0); border:1.5px solid var(--surface1); color:var(--text); padding:.8rem 1rem; border-radius:var(--radius-sm); font-size:.85rem; line-height:1.7; outline:none; resize:none; font-family:'Inter',sans-serif; min-height:0; height:100%; }
+.notes-textarea:focus { border-color:var(--mauve); }
+.notes-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; color:var(--overlay0); font-size:.85rem; gap:.5rem; }
+.notes-save-indicator { font-size:.62rem; color:var(--overlay0); transition:all .3s; }
+.notes-save-indicator.saved { color:var(--green); }
 .recap-toolbar { display:flex; align-items:center; gap:.6rem; flex-wrap:wrap; margin-bottom:1.2rem; }
 .recap-month-nav { display:flex; align-items:center; gap:6px; }
 .recap-month-label { font-size:.95rem; font-weight:600; color:var(--text); min-width:160px; text-align:center; }
@@ -410,6 +434,7 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
       </div>
     </div>
     <button class="vtab" id="vTroolaton" onclick="setView('troolaton')">Troolaton</button>
+    <button class="vtab" id="vNotes" onclick="setView('notes')">📝 Bloc-note</button>
   </div>
   <div id="todayBar" style="display:flex;align-items:center;gap:8px;background:var(--surface0);border-radius:var(--radius-sm);padding:.3rem .75rem;font-size:.72rem;max-width:600px;">
     <img id="todayImg" style="width:22px;height:22px;image-rendering:pixelated;border-radius:4px;flex-shrink:0;display:none;">
@@ -475,6 +500,7 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
   <div id="mylistView"><div id="mlContent"></div></div>
   <div id="troolatonView" style="display:none"><div id="troolatonContent"></div></div>
   <div id="recapView" style="display:none"><div id="recapContent"></div></div>
+  <div id="notesView" style="display:none"><div id="notesContent"></div></div>
   <div id="tradingView" style="display:none">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;flex-wrap:wrap;">
       <span style="font-size:.78rem;color:var(--overlay0);">Semaine :</span>
@@ -965,7 +991,7 @@ function setView(v){
   });
 
   viewMode=v;
-  ['cal','list','mylist','trading','troolaton','recap'].forEach(function(x){
+  ['cal','list','mylist','trading','troolaton','recap','notes'].forEach(function(x){
     var btn = document.getElementById('v'+x.charAt(0).toUpperCase()+x.slice(1));
     if(btn) btn.classList.toggle('on',x===v);
     document.getElementById(x+'View').style.display=x===v?'block':'none';
@@ -979,6 +1005,7 @@ function setView(v){
   else if(v==='trading'){document.getElementById('mTitle').innerHTML='<span>Craft &amp; Vente</span>';document.getElementById('calNav').style.display='none';renderTrading();}
   else if(v==='troolaton'){document.getElementById('mTitle').innerHTML='<span>Troolaton</span>';document.getElementById('calNav').style.display='none';renderTroolaton();}
   else if(v==='recap'){document.getElementById('mTitle').innerHTML='<span>Récap mensuel</span>';document.getElementById('calNav').style.display='none';renderRecap();}
+  else if(v==='notes'){document.getElementById('mTitle').innerHTML='<span>Bloc-note</span>';document.getElementById('calNav').style.display='none';renderNotes();}
 }
 
 /* ── Notifs ─────────────────────────────────────── */
@@ -1801,7 +1828,93 @@ function buildRecapView(dates, results){
 }
 
 
-var SAVE_KEYS = ['alm_mylist','alm_n','alm_td','alm_ti','alm_tp','alm_rd'];
+/* ── Bloc-note ──────────────────────────────────── */
+var notes = {};
+var activeNoteId = null;
+var notesSaveDebounce = null;
+
+try { notes = JSON.parse(localStorage.getItem('alm_notes') || '{}'); } catch(e) {}
+
+function saveNotes(){ try { localStorage.setItem('alm_notes', JSON.stringify(notes)); } catch(e) {} triggerAutoSave(); }
+function noteId(){ return 'n' + Date.now(); }
+function fmtNoteDate(ts){ var d=new Date(ts); return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+' '+pad(d.getHours())+':'+pad(d.getMinutes()); }
+function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function renderNotes(){
+  var el = document.getElementById('notesContent');
+  var ids = Object.keys(notes).sort(function(a,b){ return notes[b].updated - notes[a].updated; });
+  if(!activeNoteId || !notes[activeNoteId]) activeNoteId = ids[0] || null;
+  var sidebarHtml = ids.map(function(id){
+    var n = notes[id];
+    var preview = (n.body||'').replace(/\n/g,' ').trim();
+    return '<div class="note-item'+(id===activeNoteId?' active':'')+'" onclick="selectNote(\''+id+'\')">'
+      +'<div class="note-item-title">'+(escapeHtml(n.title)||'Sans titre')+'</div>'
+      +'<div class="note-item-preview">'+(escapeHtml(preview.slice(0,60))||'<em style="color:var(--overlay0)">Vide</em>')+'</div>'
+      +'<div class="note-item-date">'+fmtNoteDate(n.updated)+'</div>'
+      +'</div>';
+  }).join('');
+  var editorHtml = '';
+  if(activeNoteId && notes[activeNoteId]){
+    var n = notes[activeNoteId];
+    editorHtml = '<div style="height:100%;display:flex;flex-direction:column;gap:8px">'
+      +'<div class="notes-editor-top">'
+      +'<input class="notes-title-input" id="noteTitleInput" value="'+escapeHtml(n.title||'')+'" placeholder="Titre de la note..." oninput="updateNoteTitle(this.value)">'
+      +'<span class="notes-save-indicator saved" id="notesSaveInd">✓ Sauvegardé</span>'
+      +'<button class="notes-delete-btn" onclick="deleteNote(\''+activeNoteId+'\')">🗑 Supprimer</button>'
+      +'</div>'
+      +'<textarea class="notes-textarea" id="noteBodyInput" placeholder="Écris tes notes ici..." oninput="updateNoteBody(this.value)">'+escapeHtml(n.body||'')+'</textarea>'
+      +'</div>';
+  } else {
+    editorHtml = '<div class="notes-empty">📝<span>Crée une note pour commencer</span></div>';
+  }
+  el.innerHTML = '<div class="notes-layout">'
+    +'<div class="notes-sidebar">'
+    +'<button class="notes-new-btn" onclick="newNote()">+ Nouvelle note</button>'
+    +'<div class="notes-list">'+sidebarHtml+'</div>'
+    +'</div>'
+    +'<div style="min-height:0;display:flex;flex-direction:column">'+editorHtml+'</div>'
+    +'</div>';
+}
+
+function newNote(){
+  var id = noteId();
+  notes[id] = { title:'', body:'', created:Date.now(), updated:Date.now() };
+  activeNoteId = id; saveNotes(); renderNotes();
+  var t = document.getElementById('noteTitleInput'); if(t) t.focus();
+}
+
+function selectNote(id){ activeNoteId = id; renderNotes(); }
+
+function updateNoteTitle(val){
+  if(!activeNoteId) return;
+  notes[activeNoteId].title = val; notes[activeNoteId].updated = Date.now();
+  scheduleNotesSave();
+}
+
+function updateNoteBody(val){
+  if(!activeNoteId) return;
+  notes[activeNoteId].body = val; notes[activeNoteId].updated = Date.now();
+  scheduleNotesSave();
+}
+
+function scheduleNotesSave(){
+  var ind = document.getElementById('notesSaveInd');
+  if(ind){ ind.textContent='…'; ind.classList.remove('saved'); }
+  clearTimeout(notesSaveDebounce);
+  notesSaveDebounce = setTimeout(function(){
+    saveNotes();
+    var ind2 = document.getElementById('notesSaveInd');
+    if(ind2){ ind2.textContent='✓ Sauvegardé'; ind2.classList.add('saved'); }
+  }, 600);
+}
+
+function deleteNote(id){
+  if(!confirm('Supprimer cette note ?')) return;
+  delete notes[id]; if(activeNoteId===id) activeNoteId=null;
+  saveNotes(); renderNotes();
+}
+
+var SAVE_KEYS = ['alm_mylist','alm_n','alm_td','alm_ti','alm_tp','alm_rd','alm_notes'];
 var _fsHandle = null, _fsDebounce = null, _fsSaving = false;
 
 function _buildSavePayload(){

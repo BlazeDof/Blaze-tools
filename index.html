@@ -321,8 +321,15 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
 .recap-stat-v { font-size:1.1rem; font-weight:700; }
 .recap-stat-l { font-size:.58rem; color:var(--overlay0); text-transform:uppercase; letter-spacing:.08em; margin-top:2px; }
 .recap-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:8px; }
-.recap-card { background:var(--surface0); border-radius:var(--radius); padding:.75rem .9rem; display:flex; flex-direction:column; gap:.45rem; border:1.5px solid transparent; transition:border-color .15s; }
+.recap-card { background:var(--surface0); border-radius:var(--radius); padding:.75rem .9rem; display:flex; flex-direction:column; gap:.45rem; border:1.5px solid transparent; transition:all .2s; }
 .recap-card:hover { border-color:var(--surface2); }
+.recap-card.done { border-color:var(--green); background:rgba(166,227,161,.07); }
+.recap-card.done .recap-card-name { color:var(--green); }
+.recap-card.done .recap-card-qty { color:var(--green); }
+.recap-check { width:22px; height:22px; border-radius:50%; border:2px solid var(--surface2); background:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:.75rem; color:transparent; transition:all .18s; flex-shrink:0; }
+.recap-check:hover { border-color:var(--green); color:var(--green); }
+.recap-check.on { background:var(--green); border-color:var(--green); color:var(--mantle); }
+.recap-done-banner { font-size:.65rem; font-weight:600; color:var(--green); letter-spacing:.08em; text-transform:uppercase; display:flex; align-items:center; gap:.3rem; }
 .recap-card-top { display:flex; align-items:center; gap:.65rem; }
 .recap-card-img { width:40px; height:40px; background:var(--base); border-radius:var(--radius-sm); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 .recap-card-img img { width:32px; height:32px; image-rendering:pixelated; }
@@ -1509,6 +1516,30 @@ document.addEventListener('click', function(e) {
 
 /* ── Récap Mensuel ──────────────────────────────── */
 var recapY = tod.getFullYear(), recapM = tod.getMonth(), recapPerso = 1;
+var recapDone = {};
+try { recapDone = JSON.parse(localStorage.getItem('alm_rd') || '{}'); } catch(e) {}
+
+function saveRecapDone(){ try { localStorage.setItem('alm_rd', JSON.stringify(recapDone)); } catch(e) {} triggerAutoSave(); }
+
+function recapDoneKey(name){ return recapY+'-'+pad(recapM+1)+'::'+name; }
+
+function toggleRecapDone(name){
+  var k = recapDoneKey(name);
+  recapDone[k] = !recapDone[k];
+  saveRecapDone();
+  // Mettre à jour la card sans tout re-render
+  var cards = document.querySelectorAll('.recap-card');
+  cards.forEach(function(card){
+    if(card.dataset.name === name){
+      var isDone = recapDone[k];
+      card.classList.toggle('done', isDone);
+      var btn = card.querySelector('.recap-check');
+      if(btn){ btn.classList.toggle('on', isDone); btn.textContent = isDone ? '✓' : ''; }
+      var banner = card.querySelector('.recap-done-banner');
+      if(banner) banner.style.display = isDone ? 'flex' : 'none';
+    }
+  });
+}
 
 function renderRecap(){
   var el = document.getElementById('recapContent');
@@ -1661,24 +1692,28 @@ function buildRecapView(dates, results){
     r.dates.forEach(function(e){
       var isToday = e.ds === todDs;
       var isPast = e.date < tod && !isToday;
-      var isFuture = e.date > tod;
       var cls = 'recap-date-pill'+(isToday?' today':isPast?' past':'');
       var dayLabel = JOURS_COURTS[e.date.getDay()]+' '+e.date.getDate();
       pillsHtml += '<span class="'+cls+'" onclick="sel(\''+e.ds+'\');setView(\'cal\')" title="'+fmtFRDay(e.date)+' — '+e.qty+'x">'+dayLabel+(r.dates.filter(function(x){return x.ds===e.ds;}).length>1?' (×'+e.qty+')':'')+'</span>';
     });
 
-    html += '<div class="recap-card">'
+    var isDone = !!recapDone[recapY+'-'+pad(recapM+1)+'::'+r.name];
+    var safeName = r.name.replace(/'/g,"\\'");
+
+    html += '<div class="recap-card'+(isDone?' done':'')+'" data-name="'+r.name.replace(/"/g,'&quot;')+'">'
       +'<div class="recap-card-top">'
       +'<div class="recap-card-img">'+imgHtml+'</div>'
       +'<div style="flex:1;min-width:0">'
       +'<div class="recap-card-name">'+r.name+'</div>'
       +'<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:3px">'+tagsHtml+'</div>'
       +'</div>'
-      +'<div style="text-align:right;flex-shrink:0">'
+      +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">'
       +'<div class="recap-card-qty">× '+totalForPerso.toLocaleString('fr-FR')+'</div>'
       +(recapPerso > 1 ? '<div class="recap-card-qty-base">'+r.qty+' × '+recapPerso+' persos</div>' : '<div class="recap-card-qty-base">'+r.dates.length+' jour'+(r.dates.length>1?'s':'')+'</div>')
+      +'<button class="recap-check'+(isDone?' on':'')+'" onclick="toggleRecapDone(\''+safeName+'\')" title="Marquer comme préparé">'+(isDone?'✓':'')+'</button>'
       +'</div>'
       +'</div>'
+      +'<div class="recap-done-banner" style="display:'+(isDone?'flex':'none')+'">✔ Préparé</div>'
       +'<div class="recap-dates-wrap">'+pillsHtml+'</div>'
       +'</div>';
   });
@@ -1688,7 +1723,7 @@ function buildRecapView(dates, results){
 }
 
 
-var SAVE_KEYS = ['alm_mylist','alm_n','alm_td','alm_ti','alm_tp'];
+var SAVE_KEYS = ['alm_mylist','alm_n','alm_td','alm_ti','alm_tp','alm_rd'];
 var _fsHandle = null, _fsDebounce = null, _fsSaving = false;
 
 function _buildSavePayload(){

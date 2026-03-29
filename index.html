@@ -1183,6 +1183,7 @@ function saveWeekRecap(offset) {
   };
   try { localStorage.setItem(key, JSON.stringify(weekData)); } catch(e) {}
   triggerAutoSave();
+}
 
 function deleteWeek(key) {
   try {

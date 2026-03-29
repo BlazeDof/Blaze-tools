@@ -378,6 +378,10 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
     </div>
   </div>
   <div class="hdr-right">
+    <button class="nbtn-hdr" onclick="exportData()" title="Télécharger une sauvegarde de toutes tes données">💾 Export</button>
+    <label class="nbtn-hdr" title="Restaurer depuis une sauvegarde" style="cursor:pointer;">
+      📂 Import<input type="file" accept=".json" onchange="importData(event)" style="display:none;">
+    </label>
     <button class="nbtn-hdr" id="nBtn" onclick="toggleNotif()">
       <div class="ndot" id="nDot"></div>
       <span id="nLbl">Rappel</span>
@@ -1460,6 +1464,51 @@ document.addEventListener('click', function(e) {
     menu.style.display = 'none';
   }
 });
+
+/* ── Export / Import ────────────────────────────── */
+var SAVE_KEYS = ['alm_mylist','alm_n','alm_td','alm_ti','alm_tp'];
+
+function exportData(){
+  try {
+    var save = { version: 1, date: new Date().toISOString(), data: {} };
+    SAVE_KEYS.forEach(function(k){
+      var v = localStorage.getItem(k);
+      if(v !== null) save.data[k] = v;
+    });
+    var blob = new Blob([JSON.stringify(save, null, 2)], {type:'application/json'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    var d = new Date();
+    a.download = 'blaze-tools-' + d.getFullYear() + pad(d.getMonth()+1) + pad(d.getDate()) + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    toast('✅ Sauvegarde téléchargée !');
+  } catch(e) { toast('❌ Erreur export : ' + e.message); }
+}
+
+function importData(event){
+  var file = event.target.files[0];
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    try {
+      var save = JSON.parse(e.target.result);
+      if(!save || !save.data) throw new Error('Format invalide');
+      var count = 0;
+      Object.keys(save.data).forEach(function(k){
+        if(SAVE_KEYS.indexOf(k) !== -1) {
+          localStorage.setItem(k, save.data[k]);
+          count++;
+        }
+      });
+      toast('✅ ' + count + ' entrées restaurées — rechargement...');
+      setTimeout(function(){ location.reload(); }, 1500);
+    } catch(e) { toast('❌ Erreur import : ' + e.message); }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
 
 try{if(localStorage.getItem('alm_n')){notif=true;updateNBtn();}}catch(e){}
 buildFBar(); updateMLCount();

@@ -1889,9 +1889,9 @@ function ocreStats(){
     total++;
     var capt = !!ocreCaptured[m.id];
     if(capt) captured++;
-    var t = (m.type && m.type.name && m.type.name.fr)||'';
-    if(t==='Archimonstre'){archis++;if(capt)archisCapt++;}
-    else if(t==='Boss'){boss++;if(capt)bossCapt++;}
+    var t = (typeof m.type === 'string') ? m.type : (m.type && m.type.name && m.type.name.fr)||'';
+    if(t==='archimonstre'){archis++;if(capt)archisCapt++;}
+    else if(t==='boss'){boss++;if(capt)bossCapt++;}
     else{normal++;if(capt)normalCapt++;}
   });
   return {total:total,captured:captured,archis:archis,archisCapt:archisCapt,boss:boss,bossCapt:bossCapt,normal:normal,normalCapt:normalCapt};
@@ -1913,11 +1913,11 @@ function buildOcreView(){
 
   // Filtrer
   var filtered = ocreData.filter(function(m){
-    var t = (m.type && m.type.name && m.type.name.fr)||'';
+    var t = (typeof m.type === 'string') ? m.type : (m.type && m.type.name && m.type.name.fr)||'';
     if(ocreFilter !== 'all' && t.toLowerCase() !== ocreFilter) return false;
     if(!ocreShowAll && ocreCaptured[m.id]) return false;
     if(ocreSearch){
-      var name = (m.name && m.name.fr)||'';
+      var name = (typeof m.name === 'string') ? m.name : (m.name && m.name.fr)||'';
       if(name.toLowerCase().indexOf(ocreSearch.toLowerCase()) === -1) return false;
     }
     return true;
@@ -1981,13 +1981,13 @@ function buildOcreView(){
 
       html += '<div class="ocre-grid">';
       mons.forEach(function(m){
-        var name = (m.name && m.name.fr) || '?';
-        var type = (m.type && m.type.name && m.type.name.fr) || '';
+        var name = (typeof m.name === 'string') ? m.name : (m.name && m.name.fr) || '?';
+        var type = (typeof m.type === 'string') ? m.type : (m.type && m.type.name && m.type.name.fr) || '';
         var img = m.image ? 'https://www.metamob.fr/img/monstres/'+m.image : '';
         var capt = !!ocreCaptured[m.id];
-        var typeBg = type==='Archimonstre'?'rgba(203,166,247,.25)':type==='Boss'?'rgba(243,139,168,.25)':'rgba(137,180,250,.2)';
-        var typeFg = type==='Archimonstre'?'var(--mauve)':type==='Boss'?'var(--red)':'var(--blue)';
-        var typeLabel = type==='Archimonstre'?'⚡ Archi':type==='Boss'?'💀 Boss':'🐾 Monstre';
+        var typeBg = type==='archimonstre'?'rgba(203,166,247,.25)':type==='boss'?'rgba(243,139,168,.25)':'rgba(137,180,250,.2)';
+        var typeFg = type==='archimonstre'?'var(--mauve)':type==='boss'?'var(--red)':'var(--blue)';
+        var typeLabel = type==='archimonstre'?'⚡ Archi':type==='boss'?'💀 Boss':'🐾 Monstre';
 
         html += '<div class="ocre-card'+(capt?' captured':'')+'" onclick="toggleOcreCapture('+m.id+')">'
           +'<div class="ocre-card-img">'+(img?'<img src="'+img+'" alt="">':'<span style="opacity:.3;font-size:1.1rem">👾</span>')+'</div>'

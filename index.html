@@ -1868,6 +1868,7 @@ function buildRecapView(dates, results){
 /* ── Tracker Ocre ───────────────────────────────── */
 var METAMOB_KEY = '33a64f15676ba9c810a661aac89b17fd1c48a5eb80ceb4839287811ab0fd476c';
 var METAMOB_BASE = 'https://www.metamob.fr/api/v1';
+var CORS_PROXY = 'https://corsproxy.io/?url=';
 var OCRE_TEMPLATE_ID = 1; // Dofus Unity
 
 var ocreData = null;       // liste complète des monstres depuis l'API
@@ -1880,7 +1881,8 @@ try { ocreCaptured = JSON.parse(localStorage.getItem('alm_ocre') || '{}'); } cat
 function saveOcre(){ try { localStorage.setItem('alm_ocre', JSON.stringify(ocreCaptured)); } catch(e) {} triggerAutoSave(); }
 
 function metamobFetch(endpoint){
-  return fetch(METAMOB_BASE + endpoint, {
+  var _url = CORS_PROXY + encodeURIComponent(METAMOB_BASE + endpoint);
+  return fetch(_url, {
     headers: { 'Authorization': 'Bearer ' + METAMOB_KEY }
   }).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); });
 }

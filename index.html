@@ -1868,7 +1868,7 @@ function buildRecapView(dates, results){
 /* ── Tracker Ocre ───────────────────────────────── */
 var METAMOB_KEY = '33a64f15676ba9c810a661aac89b17fd1c48a5eb80ceb4839287811ab0fd476c';
 var METAMOB_BASE = 'https://www.metamob.fr/api/v1';
-var CORS_PROXY = 'https://corsproxy.io/?url=';
+var CORS_PROXY = 'https://api.allorigins.win/raw?url=';
 var OCRE_TEMPLATE_ID = 1; // Dofus Unity
 
 var ocreData = null;       // liste complète des monstres depuis l'API
@@ -1881,10 +1881,35 @@ try { ocreCaptured = JSON.parse(localStorage.getItem('alm_ocre') || '{}'); } cat
 function saveOcre(){ try { localStorage.setItem('alm_ocre', JSON.stringify(ocreCaptured)); } catch(e) {} triggerAutoSave(); }
 
 function metamobFetch(endpoint){
-  var _url = CORS_PROXY + encodeURIComponent(METAMOB_BASE + endpoint);
-  return fetch(_url, {
-    headers: { 'Authorization': 'Bearer ' + METAMOB_KEY }
-  }).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); });
+  // Essai 1 : direct (marche si Metamob supporte CORS)
+  var direct = METAMOB_BASE + endpoint;
+  var proxies = [
+    'https://api.allorigins.win/raw?url=',
+    'https://corsproxy.io/?url=',
+    'https://proxy.cors.sh/'
+  ];
+
+  function tryDirect(){
+    return fetch(direct, {
+      headers: { 'Authorization': 'Bearer ' + METAMOB_KEY }
+    }).then(function(r){
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      return r.json();
+    });
+  }
+
+  function tryProxy(i){
+    if(i >= proxies.length) return Promise.reject(new Error('Tous les proxies ont échoué'));
+    var url = proxies[i] + encodeURIComponent(direct);
+    return fetch(url, {
+      headers: { 'Authorization': 'Bearer ' + METAMOB_KEY, 'x-requested-with': 'XMLHttpRequest' }
+    }).then(function(r){
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      return r.json();
+    }).catch(function(){ return tryProxy(i+1); });
+  }
+
+  return tryDirect().catch(function(){ return tryProxy(0); });
 }
 
 function fetchOcreTemplate(){

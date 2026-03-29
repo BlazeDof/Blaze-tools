@@ -1357,7 +1357,7 @@ function renderTItems(){
     var b=tBadge(c.score,isBest?0:99);
     return '<tr'+(isBest?' class="tbest"':'')+'>'
       +'<td style="font-weight:'+(isBest?600:400)+'">'+c.item.name+'</td>'
-      +'<td><input class="tei" type="text" inputmode="numeric" data-id="kamas_'+i+'" value="'+fmtTei(c.item.kamas)+'" onfocus="this.value=parseTei(this.value)||this.value" onblur="tItems['+i+'].kamas=parseTei(this.value);saveTI();refreshTScores();this.value=fmtTei(tItems['+i+'].kamas)"></td>'
+      +'<td><input class="tei" type="text" inputmode="numeric" data-id="kamas_'+i+'" value="'+fmtTei(c.item.kamas/1000)+'" onfocus="this.value=parseTei(this.value)||this.value" onblur="tItems['+i+'].kamas=parseTei(this.value)*1000;saveTI();refreshTScores();this.value=fmtTei(tItems['+i+'].kamas/1000)"></td>'
       +'<td><input class="tei" type="text" inputmode="numeric" data-id="ventes_'+i+'" value="'+fmtTei(c.item.ventes)+'" onfocus="this.value=parseTei(this.value)||this.value" onblur="tItems['+i+'].ventes=parseTei(this.value);saveTI();refreshTScores();this.value=fmtTei(tItems['+i+'].ventes)"></td>'
       +'<td class="'+(c.benef>=0?'pos':'neg')+'" id="tbenef_'+i+'">'+(c.benef>=0?'+':'')+fmtK(c.benef/1000)+' k</td>'
       +'<td id="tscore_'+i+'"><div style="font-size:.82rem;font-weight:600">'+c.score+'/100</div>'

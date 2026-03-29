@@ -303,6 +303,39 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
 .trecap-val { font-size:1.1rem; font-weight:700; }
 .trecap-lbl { font-size:.6rem; color:var(--overlay0); text-transform:uppercase; letter-spacing:.08em; }
 
+/* ── Récap mensuel ───────────────────────────────── */
+.recap-toolbar { display:flex; align-items:center; gap:.6rem; flex-wrap:wrap; margin-bottom:1.2rem; }
+.recap-month-nav { display:flex; align-items:center; gap:6px; }
+.recap-month-label { font-size:.95rem; font-weight:600; color:var(--text); min-width:160px; text-align:center; }
+.recap-perso { display:flex; align-items:center; gap:.5rem; margin-left:auto; }
+.recap-perso label { font-size:.72rem; color:var(--overlay1); }
+.recap-perso input { background:var(--surface1); border:1px solid var(--surface2); color:var(--text); padding:4px 8px; border-radius:var(--radius-sm); font-size:.82rem; width:56px; text-align:center; outline:none; font-family:'Inter',sans-serif; -moz-appearance:textfield; appearance:textfield; }
+.recap-perso input:focus { border-color:var(--mauve); }
+.recap-perso input::-webkit-outer-spin-button, .recap-perso input::-webkit-inner-spin-button { -webkit-appearance:none; }
+.recap-progress { background:var(--surface0); border-radius:var(--radius-sm); padding:.6rem 1rem; margin-bottom:1rem; display:flex; align-items:center; gap:.8rem; }
+.recap-progress-bar-wrap { flex:1; background:var(--surface1); border-radius:3px; height:6px; }
+.recap-progress-bar { height:100%; border-radius:3px; background:var(--mauve); transition:width .4s; }
+.recap-progress-lbl { font-size:.72rem; color:var(--subtext0); white-space:nowrap; }
+.recap-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:1.2rem; }
+.recap-stat { background:var(--surface0); border-radius:var(--radius-sm); padding:.65rem .85rem; text-align:center; }
+.recap-stat-v { font-size:1.1rem; font-weight:700; }
+.recap-stat-l { font-size:.58rem; color:var(--overlay0); text-transform:uppercase; letter-spacing:.08em; margin-top:2px; }
+.recap-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:8px; }
+.recap-card { background:var(--surface0); border-radius:var(--radius); padding:.75rem .9rem; display:flex; flex-direction:column; gap:.45rem; border:1.5px solid transparent; transition:border-color .15s; }
+.recap-card:hover { border-color:var(--surface2); }
+.recap-card-top { display:flex; align-items:center; gap:.65rem; }
+.recap-card-img { width:40px; height:40px; background:var(--base); border-radius:var(--radius-sm); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.recap-card-img img { width:32px; height:32px; image-rendering:pixelated; }
+.recap-card-name { font-size:.88rem; font-weight:600; color:var(--text); flex:1; }
+.recap-card-qty { font-size:1.05rem; font-weight:700; color:var(--mauve); white-space:nowrap; }
+.recap-card-qty-base { font-size:.65rem; color:var(--overlay0); margin-top:1px; }
+.recap-dates-wrap { display:flex; flex-wrap:wrap; gap:3px; }
+.recap-date-pill { font-size:.6rem; font-weight:500; padding:1px 6px; border-radius:8px; background:var(--surface1); color:var(--subtext0); cursor:pointer; transition:all .12s; }
+.recap-date-pill:hover { background:var(--mauve); color:var(--mantle); }
+.recap-date-pill.today { background:var(--blue); color:var(--mantle); font-weight:700; }
+.recap-date-pill.past { opacity:.45; }
+.recap-empty { text-align:center; padding:4rem; color:var(--overlay0); font-size:.88rem; }
+.recap-loading { display:flex; align-items:center; justify-content:center; gap:.7rem; padding:4rem; color:var(--overlay0); font-size:.82rem; }
 @keyframes spin { to { transform: rotate(360deg); } }
 /* ── Troolaton ───────────────────────────────────── */
 .ttabs{display:flex;gap:4px;margin-bottom:1rem;}
@@ -366,6 +399,7 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
         <button class="vdrop-item" id="vList" onclick="setView('list')">Liste</button>
         <button class="vdrop-item" id="vMylist" onclick="setView('mylist')">Ma liste <span class="mlcount" id="mlCount">0</span></button>
         <button class="vdrop-item" id="vTrading" onclick="setView('trading')">Craft &amp; Vente</button>
+        <button class="vdrop-item" id="vRecap" onclick="setView('recap')">Récap mensuel</button>
       </div>
     </div>
     <button class="vtab" id="vTroolaton" onclick="setView('troolaton')">Troolaton</button>
@@ -433,6 +467,7 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
 
   <div id="mylistView"><div id="mlContent"></div></div>
   <div id="troolatonView" style="display:none"><div id="troolatonContent"></div></div>
+  <div id="recapView" style="display:none"><div id="recapContent"></div></div>
   <div id="tradingView" style="display:none">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;flex-wrap:wrap;">
       <span style="font-size:.78rem;color:var(--overlay0);">Semaine :</span>
@@ -542,6 +577,7 @@ function pad(n){return n<10?'0'+n:''+n;}
 function fmtK(n){return Math.round(n).toLocaleString('fr-FR');}
 function fmt(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
 function fmtFR(d){return d.getDate()+' '+MO[d.getMonth()]+' '+d.getFullYear();}
+function fmtFRDay(d){var j=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];return j[d.getDay()]+' '+d.getDate()+' '+MO[d.getMonth()]+' '+d.getFullYear();}
 function fmtSH(d){return pad(d.getDate())+' '+SH[d.getMonth()]+' '+d.getFullYear();}
 function fmtDM(d){return d.getDate()+' '+MO[d.getMonth()];}
 
@@ -819,7 +855,7 @@ function sel(ds){
     sec.innerHTML='<div class="ptitle">Détail du jour</div>'
       +'<div style="display:flex;align-items:center;gap:6px;margin-bottom:.7rem">'
       +'<button class="nbtn" onclick="sel(\''+prevDs+'\')">&#9664;</button>'
-      +'<div class="det-date fi" style="margin:0;flex:1;text-align:center">'+fmtFR(selDate)+'</div>'
+      +'<div class="det-date fi" style="margin:0;flex:1;text-align:center">'+fmtFRDay(selDate)+'</div>'
       +'<button class="tbtn" onclick="sel(\''+fmt(tod)+'\')">Auj.</button>'
       +'<button class="nbtn" onclick="sel(\''+nextDs+'\')">&#9654;</button>'
       +'</div>'
@@ -869,7 +905,7 @@ function goToDate(ds){
 
 function setView(v){
   document.getElementById('almanaxMenu').style.display = 'none';
-  var almanaxViews = ['cal','list','mylist','trading'];
+  var almanaxViews = ['cal','list','mylist','trading','recap'];
   document.getElementById('vAlmanax').classList.toggle('on', almanaxViews.indexOf(v) !== -1);
   document.getElementById('vTroolaton').classList.toggle('on', v === 'troolaton');
   document.querySelectorAll('.vdrop-item').forEach(function(b){
@@ -878,8 +914,9 @@ function setView(v){
   });
 
   viewMode=v;
-  ['cal','list','mylist','trading','troolaton'].forEach(function(x){
-    document.getElementById('v'+x.charAt(0).toUpperCase()+x.slice(1)).classList.toggle('on',x===v);
+  ['cal','list','mylist','trading','troolaton','recap'].forEach(function(x){
+    var btn = document.getElementById('v'+x.charAt(0).toUpperCase()+x.slice(1));
+    if(btn) btn.classList.toggle('on',x===v);
     document.getElementById(x+'View').style.display=x===v?'block':'none';
   });
   document.getElementById('calNav').style.display=v==='cal'?'flex':'none';
@@ -888,7 +925,9 @@ function setView(v){
   else if(v==='list') renderList();
   else if(v==='mylist'){document.getElementById('mTitle').innerHTML='<span>Ma liste</span>';renderML();}
   else if(v==='trading'){document.getElementById('mTitle').innerHTML='<span>Craft &amp; Vente</span>';document.getElementById('calNav').style.display='none';renderTrading();}
-  else if(v==='troolaton'){document.getElementById('mTitle').innerHTML='<span>Troolaton</span>';document.getElementById('calNav').style.display='none';document.getElementById('fbar').style.display='none';renderTroolaton();}}
+  else if(v==='troolaton'){document.getElementById('mTitle').innerHTML='<span>Troolaton</span>';document.getElementById('calNav').style.display='none';document.getElementById('fbar').style.display='none';renderTroolaton();}
+  else if(v==='recap'){document.getElementById('mTitle').innerHTML='<span>Récap mensuel</span>';document.getElementById('calNav').style.display='none';document.getElementById('fbar').style.display='none';renderRecap();}
+}
 
 /* ── Notifs ─────────────────────────────────────── */
 function toggleNotif(){
@@ -1468,7 +1507,187 @@ document.addEventListener('click', function(e) {
   }
 });
 
-/* ── Export / Import / Autosave ─────────────────── */
+/* ── Récap Mensuel ──────────────────────────────── */
+var recapY = tod.getFullYear(), recapM = tod.getMonth(), recapPerso = 1;
+
+function renderRecap(){
+  var el = document.getElementById('recapContent');
+  el.innerHTML = '<div class="recap-toolbar">'
+    +'<div class="recap-month-nav">'
+    +'<button class="nbtn" onclick="recapNav(-1)">&#9664;</button>'
+    +'<div class="recap-month-label" id="recapMonthLbl"></div>'
+    +'<button class="nbtn" onclick="recapNav(1)">&#9654;</button>'
+    +'<button class="tbtn" onclick="recapGoToday()" style="margin-left:4px">Aujourd\'hui</button>'
+    +'</div>'
+    +'<div class="recap-perso">'
+    +'<label>Nombre de persos :</label>'
+    +'<input type="number" id="recapPersoInput" min="1" max="99" value="'+recapPerso+'" oninput="recapPerso=Math.max(1,parseInt(this.value)||1);loadRecapData()">'
+    +'</div>'
+    +'</div>'
+    +'<div id="recapProgressWrap"></div>'
+    +'<div id="recapStatsWrap"></div>'
+    +'<div id="recapBody"></div>';
+  document.getElementById('recapMonthLbl').textContent = MO[recapM] + ' ' + recapY;
+  loadRecapData();
+}
+
+function recapNav(d){
+  recapM += d;
+  if(recapM > 11){ recapM = 0; recapY++; }
+  if(recapM < 0){ recapM = 11; recapY--; }
+  document.getElementById('recapMonthLbl').textContent = MO[recapM] + ' ' + recapY;
+  loadRecapData();
+}
+
+function recapGoToday(){
+  recapY = tod.getFullYear(); recapM = tod.getMonth();
+  document.getElementById('recapMonthLbl').textContent = MO[recapM] + ' ' + recapY;
+  loadRecapData();
+}
+
+function loadRecapData(){
+  var body = document.getElementById('recapBody');
+  var progressWrap = document.getElementById('recapProgressWrap');
+  var statsWrap = document.getElementById('recapStatsWrap');
+  if(!body) return;
+
+  // Générer tous les jours du mois
+  var daysInMonth = new Date(recapY, recapM + 1, 0).getDate();
+  var dates = [];
+  for(var i = 1; i <= daysInMonth; i++){
+    var d = new Date(recapY, recapM, i);
+    dates.push({ date: d, ds: fmt(d) });
+  }
+
+  // Afficher progression
+  body.innerHTML = '<div class="recap-loading"><div class="spin"></div>Chargement des '+daysInMonth+' jours...</div>';
+  progressWrap.innerHTML = '';
+  statsWrap.innerHTML = '';
+
+  var loaded = 0;
+  var results = new Array(dates.length).fill(null);
+
+  function updateProgress(){
+    loaded++;
+    var pct = Math.round(loaded / dates.length * 100);
+    progressWrap.innerHTML = '<div class="recap-progress">'
+      +'<div class="recap-progress-bar-wrap"><div class="recap-progress-bar" style="width:'+pct+'%"></div></div>'
+      +'<div class="recap-progress-lbl">'+loaded+' / '+dates.length+' jours</div>'
+      +'</div>';
+    if(loaded === dates.length) buildRecapView(dates, results);
+  }
+
+  dates.forEach(function(entry, idx){
+    fetchDay(entry.ds).then(function(data){
+      results[idx] = data;
+      updateProgress();
+    }).catch(function(){
+      results[idx] = null;
+      updateProgress();
+    });
+  });
+}
+
+function buildRecapView(dates, results){
+  var body = document.getElementById('recapBody');
+  var statsWrap = document.getElementById('recapStatsWrap');
+  var progressWrap = document.getElementById('recapProgressWrap');
+  var todDs = fmt(tod);
+
+  // Agréger les ressources
+  var resources = {}; // key = item name
+  var totalDays = 0, totalQty = 0, uniqueItems = 0;
+
+  dates.forEach(function(entry, idx){
+    var data = results[idx];
+    if(!data) return;
+    totalDays++;
+    var item = (data.tribute && data.tribute.item) || {};
+    var qty = (data.tribute && data.tribute.quantity) || 1;
+    var name = item.name || '—';
+    var img = (item.image_urls && item.image_urls.icon) || '';
+    var bName = (data.bonus && data.bonus.type && data.bonus.type.name) || '';
+    var bDesc = (data.bonus && data.bonus.description) || '';
+    var tags = classify(bDesc, bName);
+    var cat = getCat(tags[0]);
+
+    totalQty += qty;
+    if(!resources[name]){
+      uniqueItems++;
+      resources[name] = { name:name, img:img, qty:0, dates:[], cat:cat, tags:tags };
+    }
+    resources[name].qty += qty;
+    resources[name].dates.push({ ds: entry.ds, date: entry.date, qty: qty });
+  });
+
+  // Supprimer la barre de progression
+  progressWrap.innerHTML = '';
+
+  // Stats globales
+  var isCurrentMonth = (recapY === tod.getFullYear() && recapM === tod.getMonth());
+  statsWrap.innerHTML = '<div class="recap-stats">'
+    +'<div class="recap-stat"><div class="recap-stat-v" style="color:var(--mauve)">'+totalDays+'</div><div class="recap-stat-l">Jours chargés</div></div>'
+    +'<div class="recap-stat"><div class="recap-stat-v" style="color:var(--blue)">'+(uniqueItems)+'</div><div class="recap-stat-l">Ressources uniques</div></div>'
+    +'<div class="recap-stat"><div class="recap-stat-v" style="color:var(--peach)">'+(totalQty * recapPerso).toLocaleString('fr-FR')+'</div><div class="recap-stat-l">Offrandes totales × '+recapPerso+'</div></div>'
+    +'</div>';
+
+  // Trier par quantité décroissante
+  var sorted = Object.values(resources).sort(function(a,b){ return b.qty - a.qty; });
+
+  if(sorted.length === 0){
+    body.innerHTML = '<div class="recap-empty">Aucune donnée disponible pour ce mois.</div>';
+    return;
+  }
+
+  // Construire les cartes
+  var html = '<div class="recap-grid">';
+  var JOURS_COURTS = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+
+  sorted.forEach(function(r){
+    var totalForPerso = r.qty * recapPerso;
+    var imgHtml = r.img
+      ? '<img src="'+r.img+'" alt="'+r.name+'">'
+      : '<span style="font-size:1.2rem;opacity:.3">&#9876;</span>';
+
+    // Tags badges
+    var tagsHtml = '';
+    for(var i = 0; i < r.tags.length; i++){
+      var c = getCat(r.tags[i]);
+      tagsHtml += '<span style="font-size:.56rem;font-weight:600;padding:1px 6px;border-radius:4px;color:'+c.fg+';background:'+c.bg+'">'+c.label+'</span> ';
+    }
+
+    // Pills de dates
+    var pillsHtml = '';
+    r.dates.forEach(function(e){
+      var isToday = e.ds === todDs;
+      var isPast = e.date < tod && !isToday;
+      var isFuture = e.date > tod;
+      var cls = 'recap-date-pill'+(isToday?' today':isPast?' past':'');
+      var dayLabel = JOURS_COURTS[e.date.getDay()]+' '+e.date.getDate();
+      pillsHtml += '<span class="'+cls+'" onclick="sel(\''+e.ds+'\');setView(\'cal\')" title="'+fmtFRDay(e.date)+' — '+e.qty+'x">'+dayLabel+(r.dates.filter(function(x){return x.ds===e.ds;}).length>1?' (×'+e.qty+')':'')+'</span>';
+    });
+
+    html += '<div class="recap-card">'
+      +'<div class="recap-card-top">'
+      +'<div class="recap-card-img">'+imgHtml+'</div>'
+      +'<div style="flex:1;min-width:0">'
+      +'<div class="recap-card-name">'+r.name+'</div>'
+      +'<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:3px">'+tagsHtml+'</div>'
+      +'</div>'
+      +'<div style="text-align:right;flex-shrink:0">'
+      +'<div class="recap-card-qty">× '+totalForPerso.toLocaleString('fr-FR')+'</div>'
+      +(recapPerso > 1 ? '<div class="recap-card-qty-base">'+r.qty+' × '+recapPerso+' persos</div>' : '<div class="recap-card-qty-base">'+r.dates.length+' jour'+(r.dates.length>1?'s':'')+'</div>')
+      +'</div>'
+      +'</div>'
+      +'<div class="recap-dates-wrap">'+pillsHtml+'</div>'
+      +'</div>';
+  });
+
+  html += '</div>';
+  body.innerHTML = html;
+}
+
+
 var SAVE_KEYS = ['alm_mylist','alm_n','alm_td','alm_ti','alm_tp'];
 var _fsHandle = null, _fsDebounce = null, _fsSaving = false;
 

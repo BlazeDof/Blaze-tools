@@ -1877,9 +1877,43 @@ var ocreShowAll = true;    // false = masquer capturés
 try { ocreCaptured = JSON.parse(localStorage.getItem('alm_ocre') || '{}'); } catch(e) {}
 function saveOcre(){ try { localStorage.setItem('alm_ocre', JSON.stringify(ocreCaptured)); } catch(e) {} triggerAutoSave(); }
 
+var ocreImgCache = {}; // { id: imageUrl }
+try { ocreImgCache = JSON.parse(localStorage.getItem('alm_ocre_img') || '{}'); } catch(e) {}
+function saveOcreImgCache(){ try { localStorage.setItem('alm_ocre_img', JSON.stringify(ocreImgCache)); } catch(e) {} }
+
+function fetchOcreImages(){
+  // Fetch images for monsters we don't have yet, 3 at a time
+  var missing = OCRE_DATA.filter(function(m){ return !ocreImgCache[m.id]; });
+  if(missing.length === 0) return;
+
+  var i = 0;
+  function next(){
+    if(i >= missing.length) return;
+    var m = missing[i++];
+    fetch('https://api.dofusdu.de/dofus3/v1/fr/monsters/search?query='+encodeURIComponent(m.name)+'&limit=1')
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        var img = d && d[0] && d[0].image && d[0].image.icon;
+        if(img){ 
+          ocreImgCache[m.id] = img;
+          // Update img tag if visible
+          var el = document.getElementById('ocre-img-'+m.id);
+          if(el){ el.src = img; el.style.display='block'; }
+          var ph = document.getElementById('ocre-ph-'+m.id);
+          if(ph) ph.style.display='none';
+          if(i % 20 === 0) saveOcreImgCache();
+        }
+        setTimeout(next, 80);
+      }).catch(function(){ setTimeout(next, 200); });
+  }
+  // Start 3 parallel workers
+  next(); setTimeout(next, 30); setTimeout(next, 60);
+}
+
 function renderOcre(){
   if(!ocreData) ocreData = OCRE_DATA;
   buildOcreView();
+  fetchOcreImages();
 }
 
 function ocreStats(){
@@ -1983,14 +2017,18 @@ function buildOcreView(){
       mons.forEach(function(m){
         var name = (typeof m.name === 'string') ? m.name : (m.name && m.name.fr) || '?';
         var type = (typeof m.type === 'string') ? m.type : (m.type && m.type.name && m.type.name.fr) || '';
-        var img = m.image ? 'https://www.metamob.fr/img/monstres/'+m.image : '';
+        var img = ocreImgCache[m.id] || '';
         var capt = !!ocreCaptured[m.id];
         var typeBg = type==='archimonstre'?'rgba(203,166,247,.25)':type==='boss'?'rgba(243,139,168,.25)':'rgba(137,180,250,.2)';
         var typeFg = type==='archimonstre'?'var(--mauve)':type==='boss'?'var(--red)':'var(--blue)';
         var typeLabel = type==='archimonstre'?'⚡ Archi':type==='boss'?'💀 Boss':'🐾 Monstre';
 
         html += '<div class="ocre-card'+(capt?' captured':'')+'" onclick="toggleOcreCapture('+m.id+')">'
-          +'<div class="ocre-card-img">'+(img?'<img src="'+img+'" alt="">':'<span style="opacity:.3;font-size:1.1rem">👾</span>')+'</div>'
+          +'<div class="ocre-card-img">'
+          +(img ? '<img id="ocre-img-'+m.id+'" src="'+img+'" style="width:32px;height:32px;image-rendering:pixelated;" alt="">'
+                : '<img id="ocre-img-'+m.id+'" src="" style="width:32px;height:32px;display:none">'
+                  +'<span id="ocre-ph-'+m.id+'" style="opacity:.25;font-size:1.1rem">👾</span>')
+          +'</div>'
           +'<div class="ocre-card-info">'
           +'<div class="ocre-name">'+name+'</div>'
           +'<div class="ocre-type-badge" style="background:'+typeBg+';color:'+typeFg+'">'+typeLabel+'</div>'
@@ -2098,7 +2136,7 @@ function deleteNote(id){
   saveNotes(); renderNotes();
 }
 
-var SAVE_KEYS = ['alm_mylist','alm_n','alm_td','alm_ti','alm_tp','alm_rd','alm_notes','alm_ocre'];
+var SAVE_KEYS = ['alm_mylist','alm_n','alm_td','alm_ti','alm_tp','alm_rd','alm_notes','alm_ocre','alm_ocre_img'];
 var _fsHandle = null, _fsDebounce = null, _fsSaving = false;
 
 function _buildSavePayload(){

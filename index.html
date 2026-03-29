@@ -499,6 +499,10 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
     <div class="ptitle">Détail du jour</div>
     <div class="det-empty">Sélectionne un jour</div>
   </div>
+  <div id="nextMLSec">
+    <div class="ptitle">Prochain de ta liste</div>
+    <div id="nextMLContent"><div class="det-empty" style="font-size:.75rem">Chargement...</div></div>
+  </div>
   <div id="histSec">
     <div class="ptitle">Historique récent</div>
     <div id="histList" style="color:var(--overlay0);font-size:.8rem">Chargement...</div>
@@ -770,7 +774,7 @@ function updateMLCount(){var n=Object.keys(myList).length,el=document.getElement
 function toggleML(ds){
   var wasIn=inML(ds);
   if(wasIn)delete myList[ds]; else myList[ds]=true;
-  saveMyList(); updateMLCount();
+  saveMyList(); updateMLCount(); loadNextML();
   document.querySelectorAll('[data-date="'+ds+'"]').forEach(function(el){
     el.classList.toggle('inlist',!wasIn);
     var fav=el.querySelector('.lfav'); if(fav)fav.classList.toggle('on',!wasIn);
@@ -899,7 +903,47 @@ function loadHistory(){
   });
 }
 
-/* ── Navigation ─────────────────────────────────── */
+function loadNextML(){
+  var el = document.getElementById('nextMLContent');
+  if(!el) return;
+  var keys = Object.keys(myList).sort();
+  var todStr = fmt(tod);
+  var next = null;
+  for(var i=0;i<keys.length;i++){ if(keys[i]>=todStr){next=keys[i];break;} }
+  if(!next){ el.innerHTML='<div class="det-empty" style="font-size:.75rem;padding:.8rem 0">Aucun jour à venir dans ta liste.</div>'; return; }
+  el.innerHTML='<div class="pload"><div class="dspin" style="width:12px;height:12px;border:1.5px solid var(--surface2);border-top-color:var(--mauve);border-radius:50%;animation:spin .9s linear infinite"></div></div>';
+  var parts=next.split('-'), nextDate=new Date(parseInt(parts[0]),parseInt(parts[1])-1,parseInt(parts[2]));
+  var diffDays=Math.round((nextDate-tod)/(1000*60*60*24));
+  fetchDay(next).then(function(data){
+    if(!data){el.innerHTML='<div class="det-empty" style="font-size:.75rem">Données indisponibles</div>';return;}
+    var item=(data.tribute&&data.tribute.item)||{};
+    var qty=(data.tribute&&data.tribute.quantity)||1;
+    var bName=(data.bonus&&data.bonus.type&&data.bonus.type.name)||'—';
+    var bDesc=(data.bonus&&data.bonus.description)||'';
+    var tags=classify(bDesc,bName), cat=getCat(tags[0]);
+    var JOURS=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+    var whenLbl = diffDays===0 ? '<span style="color:var(--blue);font-weight:700">Aujourd\'hui !</span>'
+      : diffDays===1 ? '<span style="color:var(--peach);font-weight:600">Demain</span>'
+      : '<span style="color:var(--subtext0)">Dans '+diffDays+' jours</span>';
+    el.innerHTML='<div style="background:var(--surface0);border-radius:var(--radius-sm);padding:.65rem;border-left:3px solid '+cat.fg+';cursor:pointer" onclick="sel(\''+next+'\');setView(\'cal\')">'
+      +'<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem">'
+      +whenLbl
+      +'<span style="font-size:.65rem;color:var(--overlay0);margin-left:auto">'+JOURS[nextDate.getDay()]+' '+nextDate.getDate()+' '+MO[nextDate.getMonth()]+'</span>'
+      +'</div>'
+      +'<div style="display:flex;align-items:center;gap:.6rem">'
+      +(item.image_urls&&item.image_urls.icon?'<img src="'+item.image_urls.icon+'" style="width:30px;height:30px;image-rendering:pixelated;border-radius:4px;flex-shrink:0">':'')
+      +'<div style="min-width:0">'
+      +'<div style="font-size:.82rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(item.name||'—')+'</div>'
+      +'<div style="font-size:.68rem;color:var(--mauve);margin-top:1px">× '+qty+' exemplaire'+(qty>1?'s':'')+'</div>'
+      +'</div>'
+      +'</div>'
+      +'<div style="margin-top:.45rem">'
+      +'<span style="font-size:.58rem;font-weight:600;padding:1px 6px;border-radius:3px;color:'+cat.fg+';background:'+cat.bg+'">'+cat.label+'</span>'
+      +'<div style="font-size:.72rem;color:var(--subtext0);margin-top:3px;line-height:1.4">'+bName+'</div>'
+      +'</div>'
+      +'</div>';
+  });
+}
 function cm(d){vM+=d;if(vM>11){vM=0;vY++;}if(vM<0){vM=11;vY--;}renderCal();}
 function goToday(){vY=tod.getFullYear();vM=tod.getMonth();renderCal();setTimeout(function(){sel(fmt(tod));},80);}
 function goToDate(ds){
@@ -1851,7 +1895,7 @@ function importData(event){
 try{if(localStorage.getItem('alm_n')){notif=true;updateNBtn();}}catch(e){}
 buildFBar(); updateMLCount();
 renderCal();
-setTimeout(function(){sel(fmt(tod));loadHistory();},60);
+setTimeout(function(){sel(fmt(tod));loadHistory();loadNextML();},60);
 fetchDay(fmt(tod)).then(function(data){
   if(!data) return;
   var nm=(data.bonus&&data.bonus.type&&data.bonus.type.name)||'';

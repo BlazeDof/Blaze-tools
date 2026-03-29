@@ -927,13 +927,14 @@ function setView(v){
     document.getElementById(x+'View').style.display=x===v?'block':'none';
   });
   document.getElementById('calNav').style.display=v==='cal'?'flex':'none';
-  document.getElementById('fbar').style.display='';
+  var showFbar = (v==='cal'||v==='list');
+  document.getElementById('fbar').style.display=showFbar?'':'none';
   if(v==='cal'){vY=vY;vM=vM;document.getElementById('mTitle').innerHTML=MO[vM]+' <span>'+vY+'</span>';renderCal();}
   else if(v==='list') renderList();
   else if(v==='mylist'){document.getElementById('mTitle').innerHTML='<span>Ma liste</span>';renderML();}
   else if(v==='trading'){document.getElementById('mTitle').innerHTML='<span>Craft &amp; Vente</span>';document.getElementById('calNav').style.display='none';renderTrading();}
-  else if(v==='troolaton'){document.getElementById('mTitle').innerHTML='<span>Troolaton</span>';document.getElementById('calNav').style.display='none';document.getElementById('fbar').style.display='none';renderTroolaton();}
-  else if(v==='recap'){document.getElementById('mTitle').innerHTML='<span>Récap mensuel</span>';document.getElementById('calNav').style.display='none';document.getElementById('fbar').style.display='none';renderRecap();}
+  else if(v==='troolaton'){document.getElementById('mTitle').innerHTML='<span>Troolaton</span>';document.getElementById('calNav').style.display='none';renderTroolaton();}
+  else if(v==='recap'){document.getElementById('mTitle').innerHTML='<span>Récap mensuel</span>';document.getElementById('calNav').style.display='none';renderRecap();}
 }
 
 /* ── Notifs ─────────────────────────────────────── */

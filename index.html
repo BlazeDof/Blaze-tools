@@ -405,6 +405,40 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
 .tbar{height:6px;background:var(--surface1);border-radius:3px;margin-top:3px;min-width:60px;}
 .tbar-fill{height:100%;border-radius:3px;transition:width .3s;}
 @keyframes fi { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:none; } }
+/* ── Ocre tracker ────────────────────────────────── */
+.ocre-toolbar { display:flex; align-items:center; gap:.8rem; flex-wrap:wrap; margin-bottom:1.2rem; }
+.ocre-progress-wrap { background:var(--surface0); border-radius:var(--radius-sm); padding:.7rem 1rem; margin-bottom:1.2rem; display:flex; align-items:center; gap:1rem; }
+.ocre-progress-bar-wrap { flex:1; background:var(--surface1); border-radius:3px; height:8px; }
+.ocre-progress-bar { height:100%; border-radius:3px; background:linear-gradient(90deg,var(--mauve),var(--peach)); transition:width .4s; }
+.ocre-progress-lbl { font-size:.75rem; color:var(--subtext0); white-space:nowrap; font-weight:600; }
+.ocre-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:1.2rem; }
+.ocre-stat { background:var(--surface0); border-radius:var(--radius-sm); padding:.65rem .85rem; text-align:center; }
+.ocre-stat-v { font-size:1.05rem; font-weight:700; }
+.ocre-stat-l { font-size:.58rem; color:var(--overlay0); text-transform:uppercase; letter-spacing:.08em; margin-top:2px; }
+.ocre-filters { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:1rem; }
+.ocre-chip { padding:.22rem .65rem; border-radius:20px; background:var(--surface0); color:var(--overlay1); font-size:.68rem; font-weight:500; cursor:pointer; border:1.5px solid transparent; transition:all .15s; white-space:nowrap; }
+.ocre-chip:hover { background:var(--surface1); color:var(--text); }
+.ocre-chip.on { background:var(--mauve); color:var(--mantle); font-weight:600; }
+.ocre-step-title { font-size:.62rem; font-weight:700; letter-spacing:.15em; color:var(--overlay0); text-transform:uppercase; margin:1.2rem 0 .6rem; display:flex; align-items:center; gap:.5rem; }
+.ocre-step-title::after { content:''; flex:1; height:1px; background:var(--surface0); }
+.ocre-step-title span { color:var(--mauve); }
+.ocre-step-title .step-prog { color:var(--green); margin-left:.3rem; font-size:.6rem; }
+.ocre-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:6px; }
+.ocre-card { background:var(--surface0); border-radius:var(--radius); padding:.6rem .7rem; display:flex; align-items:center; gap:.55rem; border:1.5px solid transparent; cursor:pointer; transition:all .18s; position:relative; }
+.ocre-card:hover { background:var(--surface1); border-color:var(--surface2); }
+.ocre-card.captured { background:rgba(166,227,161,.08); border-color:var(--green); }
+.ocre-card.captured .ocre-name { color:var(--green); text-decoration:line-through; opacity:.7; }
+.ocre-card-img { width:36px; height:36px; background:var(--base); border-radius:6px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.ocre-card-img img { width:32px; height:32px; image-rendering:pixelated; }
+.ocre-card-info { flex:1; min-width:0; }
+.ocre-name { font-size:.75rem; font-weight:600; color:var(--text); line-height:1.3; }
+.ocre-type-badge { font-size:.52rem; font-weight:600; padding:1px 5px; border-radius:3px; display:inline-block; margin-top:2px; }
+.ocre-check { width:16px; height:16px; border-radius:50%; border:2px solid var(--surface2); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:.6rem; color:transparent; transition:all .15s; }
+.ocre-card.captured .ocre-check { background:var(--green); border-color:var(--green); color:var(--mantle); }
+.ocre-search { background:var(--surface0); border:none; color:var(--text); padding:.15rem .8rem .15rem 30px; border-radius:var(--radius-sm); font-size:.78rem; width:200px; height:30px; outline:none; font-family:'Inter',sans-serif; }
+.ocre-search:focus { background:var(--surface1); }
+.ocre-search::placeholder { color:var(--overlay0); }
+.ocre-loading { display:flex; align-items:center; justify-content:center; gap:.8rem; padding:4rem; color:var(--overlay0); font-size:.85rem; }
 </style>
 </head>
 <body>
@@ -435,6 +469,7 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
     </div>
     <button class="vtab" id="vTroolaton" onclick="setView('troolaton')">Troolaton</button>
     <button class="vtab" id="vNotes" onclick="setView('notes')">📝 Bloc-note</button>
+    <button class="vtab" id="vOcre" onclick="setView('ocre')">🟠 Ocre</button>
   </div>
   <div id="todayBar" style="display:flex;align-items:center;gap:8px;background:var(--surface0);border-radius:var(--radius-sm);padding:.3rem .75rem;font-size:.72rem;max-width:600px;">
     <img id="todayImg" style="width:22px;height:22px;image-rendering:pixelated;border-radius:4px;flex-shrink:0;display:none;">
@@ -501,6 +536,7 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
   <div id="troolatonView" style="display:none"><div id="troolatonContent"></div></div>
   <div id="recapView" style="display:none"><div id="recapContent"></div></div>
   <div id="notesView" style="display:none"><div id="notesContent"></div></div>
+  <div id="ocreView" style="display:none"><div id="ocreContent"></div></div>
   <div id="tradingView" style="display:none">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;flex-wrap:wrap;">
       <span style="font-size:.78rem;color:var(--overlay0);">Semaine :</span>
@@ -991,7 +1027,7 @@ function setView(v){
   });
 
   viewMode=v;
-  ['cal','list','mylist','trading','troolaton','recap','notes'].forEach(function(x){
+  ['cal','list','mylist','trading','troolaton','recap','notes','ocre'].forEach(function(x){
     var btn = document.getElementById('v'+x.charAt(0).toUpperCase()+x.slice(1));
     if(btn) btn.classList.toggle('on',x===v);
     document.getElementById(x+'View').style.display=x===v?'block':'none';
@@ -1006,6 +1042,7 @@ function setView(v){
   else if(v==='troolaton'){document.getElementById('mTitle').innerHTML='<span>Troolaton</span>';document.getElementById('calNav').style.display='none';renderTroolaton();}
   else if(v==='recap'){document.getElementById('mTitle').innerHTML='<span>Récap mensuel</span>';document.getElementById('calNav').style.display='none';renderRecap();}
   else if(v==='notes'){document.getElementById('mTitle').innerHTML='<span>Bloc-note</span>';document.getElementById('calNav').style.display='none';renderNotes();}
+  else if(v==='ocre'){document.getElementById('mTitle').innerHTML='<span>🟠 Tracker Ocre</span>';document.getElementById('calNav').style.display='none';renderOcre();}
 }
 
 /* ── Notifs ─────────────────────────────────────── */
@@ -1828,7 +1865,192 @@ function buildRecapView(dates, results){
 }
 
 
-/* ── Bloc-note ──────────────────────────────────── */
+/* ── Tracker Ocre ───────────────────────────────── */
+var METAMOB_KEY = '33a64f15676ba9c810a661aac89b17fd1c48a5eb80ceb4839287811ab0fd476c';
+var METAMOB_BASE = 'https://www.metamob.fr/api/v1';
+var OCRE_TEMPLATE_ID = 1; // Dofus Unity
+
+var ocreData = null;       // liste complète des monstres depuis l'API
+var ocreCaptured = {};     // { monsterId: true }
+var ocreFilter = 'all';    // all | monstre | archimonstre | boss
+var ocreSearch = '';
+var ocreShowAll = true;    // false = masquer capturés
+
+try { ocreCaptured = JSON.parse(localStorage.getItem('alm_ocre') || '{}'); } catch(e) {}
+function saveOcre(){ try { localStorage.setItem('alm_ocre', JSON.stringify(ocreCaptured)); } catch(e) {} triggerAutoSave(); }
+
+function metamobFetch(endpoint){
+  return fetch(METAMOB_BASE + endpoint, {
+    headers: { 'Authorization': 'Bearer ' + METAMOB_KEY }
+  }).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); });
+}
+
+function fetchOcreTemplate(){
+  // Récupère tous les monstres par pages
+  var all = [];
+  function fetchPage(offset){
+    return metamobFetch('/quest-templates/'+OCRE_TEMPLATE_ID+'?limit=100&offset='+offset)
+      .then(function(res){
+        var monsters = (res.data && res.data.monsters) || [];
+        all = all.concat(monsters);
+        var total = res.data && res.data.monster_count || 0;
+        if(all.length < total && monsters.length === 100){
+          return fetchPage(offset + 100);
+        }
+        return { monsters: all, stepCount: res.data && res.data.step_count };
+      });
+  }
+  return fetchPage(0);
+}
+
+function renderOcre(){
+  var el = document.getElementById('ocreContent');
+  el.innerHTML = '<div class="ocre-loading"><div class="spin"></div>Chargement de la quête Ocre...</div>';
+
+  if(ocreData){
+    buildOcreView();
+    return;
+  }
+
+  fetchOcreTemplate().then(function(res){
+    ocreData = res.monsters;
+    buildOcreView();
+  }).catch(function(e){
+    el.innerHTML = '<div class="ocre-loading" style="color:var(--red)">❌ Erreur chargement API Metamob : '+e.message+'</div>';
+  });
+}
+
+function ocreStats(){
+  if(!ocreData) return {total:0,captured:0,archis:0,archisCapt:0,boss:0,bossCapt:0,normal:0,normalCapt:0};
+  var total=0,captured=0,archis=0,archisCapt=0,boss=0,bossCapt=0,normal=0,normalCapt=0;
+  ocreData.forEach(function(m){
+    total++;
+    var capt = !!ocreCaptured[m.id];
+    if(capt) captured++;
+    var t = (m.type && m.type.name && m.type.name.fr)||'';
+    if(t==='Archimonstre'){archis++;if(capt)archisCapt++;}
+    else if(t==='Boss'){boss++;if(capt)bossCapt++;}
+    else{normal++;if(capt)normalCapt++;}
+  });
+  return {total:total,captured:captured,archis:archis,archisCapt:archisCapt,boss:boss,bossCapt:bossCapt,normal:normal,normalCapt:normalCapt};
+}
+
+function buildOcreView(){
+  var el = document.getElementById('ocreContent');
+  var s = ocreStats();
+  var pct = s.total > 0 ? Math.round(s.captured/s.total*100) : 0;
+
+  // Grouper par étape
+  var byStep = {};
+  ocreData.forEach(function(m){
+    var step = m.step || 1;
+    if(!byStep[step]) byStep[step] = [];
+    byStep[step].push(m);
+  });
+  var steps = Object.keys(byStep).map(Number).sort(function(a,b){return a-b;});
+
+  // Filtrer
+  var filtered = ocreData.filter(function(m){
+    var t = (m.type && m.type.name && m.type.name.fr)||'';
+    if(ocreFilter !== 'all' && t.toLowerCase() !== ocreFilter) return false;
+    if(!ocreShowAll && ocreCaptured[m.id]) return false;
+    if(ocreSearch){
+      var name = (m.name && m.name.fr)||'';
+      if(name.toLowerCase().indexOf(ocreSearch.toLowerCase()) === -1) return false;
+    }
+    return true;
+  });
+
+  // Regrouper filtrés par étape
+  var filtByStep = {};
+  filtered.forEach(function(m){
+    var step = m.step || 1;
+    if(!filtByStep[step]) filtByStep[step] = [];
+    filtByStep[step].push(m);
+  });
+
+  var html = '';
+
+  // Toolbar
+  html += '<div class="ocre-toolbar">'
+    +'<div class="swrap"><svg viewBox="0 0 24 24" style="position:absolute;left:9px;top:50%;transform:translateY(-50%);width:13px;height:13px;fill:none;stroke:var(--overlay0);stroke-width:2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>'
+    +'<input class="ocre-search sinput" placeholder="Rechercher un monstre..." oninput="ocreSearch=this.value;buildOcreView()" value="'+ocreSearch+'"></div>'
+    +'<div class="ocre-filters">'
+    +'<div class="ocre-chip'+(ocreFilter==='all'?' on':'')+'" onclick="ocreFilter=\'all\';buildOcreView()">Tous ('+s.total+')</div>'
+    +'<div class="ocre-chip'+(ocreFilter==='monstre'?' on':'')+'" onclick="ocreFilter=\'monstre\';buildOcreView()" style="'+(ocreFilter==='monstre'?'background:rgba(137,180,250,.8);color:var(--mantle)':'')+'">🐾 Monstres ('+s.normal+')</div>'
+    +'<div class="ocre-chip'+(ocreFilter==='archimonstre'?' on':'')+'" onclick="ocreFilter=\'archimonstre\';buildOcreView()" style="'+(ocreFilter==='archimonstre'?'background:rgba(203,166,247,.8);color:var(--mantle)':'')+'">⚡ Archis ('+s.archis+')</div>'
+    +'<div class="ocre-chip'+(ocreFilter==='boss'?' on':'')+'" onclick="ocreFilter=\'boss\';buildOcreView()" style="'+(ocreFilter==='boss'?'background:rgba(243,139,168,.8);color:var(--mantle)':'')+'">💀 Boss ('+s.boss+')</div>'
+    +'</div>'
+    +'<label style="display:flex;align-items:center;gap:.4rem;font-size:.72rem;color:var(--subtext0);cursor:pointer;margin-left:auto">'
+    +'<input type="checkbox" '+(ocreShowAll?'':'checked')+' onchange="ocreShowAll=!this.checked;buildOcreView()"> Masquer capturés'
+    +'</label>'
+    +'</div>';
+
+  // Progress bar
+  html += '<div class="ocre-progress-wrap">'
+    +'<div class="ocre-progress-bar-wrap"><div class="ocre-progress-bar" style="width:'+pct+'%"></div></div>'
+    +'<div class="ocre-progress-lbl">'+s.captured+' / '+s.total+' — '+pct+'%</div>'
+    +'</div>';
+
+  // Stats
+  html += '<div class="ocre-stats">'
+    +'<div class="ocre-stat"><div class="ocre-stat-v" style="color:var(--mauve)">'+pct+'%</div><div class="ocre-stat-l">Progression</div></div>'
+    +'<div class="ocre-stat"><div class="ocre-stat-v" style="color:var(--blue)">'+s.normalCapt+' / '+s.normal+'</div><div class="ocre-stat-l">🐾 Monstres</div></div>'
+    +'<div class="ocre-stat"><div class="ocre-stat-v" style="color:var(--mauve)">'+s.archisCapt+' / '+s.archis+'</div><div class="ocre-stat-l">⚡ Archimonstres</div></div>'
+    +'<div class="ocre-stat"><div class="ocre-stat-v" style="color:var(--red)">'+s.bossCapt+' / '+s.boss+'</div><div class="ocre-stat-l">💀 Boss</div></div>'
+    +'</div>';
+
+  // Par étape
+  var visibleSteps = steps.filter(function(step){ return filtByStep[step] && filtByStep[step].length > 0; });
+
+  if(visibleSteps.length === 0){
+    html += '<div style="text-align:center;padding:3rem;color:var(--overlay0)">Aucun monstre à afficher.</div>';
+  } else {
+    visibleSteps.forEach(function(step){
+      var mons = filtByStep[step];
+      var stepAll = byStep[step] || [];
+      var stepCapt = stepAll.filter(function(m){ return ocreCaptured[m.id]; }).length;
+      var stepDone = stepCapt === stepAll.length;
+
+      html += '<div class="ocre-step-title">Étape <span>'+step+'</span>'
+        +'<span class="step-prog">('+stepCapt+'/'+stepAll.length+')</span>'
+        +(stepDone?'<span style="color:var(--green);font-size:.65rem">✓ Complète</span>':'')
+        +'</div>';
+
+      html += '<div class="ocre-grid">';
+      mons.forEach(function(m){
+        var name = (m.name && m.name.fr) || '?';
+        var type = (m.type && m.type.name && m.type.name.fr) || '';
+        var img = m.image ? 'https://www.metamob.fr/img/monstres/'+m.image : '';
+        var capt = !!ocreCaptured[m.id];
+        var typeBg = type==='Archimonstre'?'rgba(203,166,247,.25)':type==='Boss'?'rgba(243,139,168,.25)':'rgba(137,180,250,.2)';
+        var typeFg = type==='Archimonstre'?'var(--mauve)':type==='Boss'?'var(--red)':'var(--blue)';
+        var typeLabel = type==='Archimonstre'?'⚡ Archi':type==='Boss'?'💀 Boss':'🐾 Monstre';
+
+        html += '<div class="ocre-card'+(capt?' captured':'')+'" onclick="toggleOcreCapture('+m.id+')">'
+          +'<div class="ocre-card-img">'+(img?'<img src="'+img+'" alt="">':'<span style="opacity:.3;font-size:1.1rem">👾</span>')+'</div>'
+          +'<div class="ocre-card-info">'
+          +'<div class="ocre-name">'+name+'</div>'
+          +'<div class="ocre-type-badge" style="background:'+typeBg+';color:'+typeFg+'">'+typeLabel+'</div>'
+          +'</div>'
+          +'<div class="ocre-check">'+(capt?'✓':'')+'</div>'
+          +'</div>';
+      });
+      html += '</div>';
+    });
+  }
+
+  el.innerHTML = html;
+}
+
+function toggleOcreCapture(id){
+  if(ocreCaptured[id]) delete ocreCaptured[id];
+  else ocreCaptured[id] = true;
+  saveOcre();
+  buildOcreView();
+}
+
+
 var notes = {};
 var activeNoteId = null;
 var notesSaveDebounce = null;
@@ -1914,7 +2136,7 @@ function deleteNote(id){
   saveNotes(); renderNotes();
 }
 
-var SAVE_KEYS = ['alm_mylist','alm_n','alm_td','alm_ti','alm_tp','alm_rd','alm_notes'];
+var SAVE_KEYS = ['alm_mylist','alm_n','alm_td','alm_ti','alm_tp','alm_rd','alm_notes','alm_ocre'];
 var _fsHandle = null, _fsDebounce = null, _fsSaving = false;
 
 function _buildSavePayload(){

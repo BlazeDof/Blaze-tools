@@ -1369,24 +1369,31 @@ function renderTItems(){
 }
 
 function calcTSim(){
-  var budget=(parseFloat(document.getElementById('tSimBudget').value)||0)*1000;
+  var raw = document.getElementById('tSimBudget').value;
+  var budget=(parseTei(raw)||0)*1000;
   if(!budget){document.getElementById('tSimTickets').textContent='';document.getElementById('tSimItems').innerHTML='';document.getElementById('tSimRes').innerHTML='';return;}
   var tickets=Math.floor(budget/T_TICKET);
   var trools=tickets*T_TRPT;
   document.getElementById('tSimTickets').textContent=fmtK(tickets)+' tickets → '+fmtK(trools)+' troolatons';
-  var html='<div style="margin:.7rem 0;display:flex;flex-direction:column;gap:5px;">';
-  tItems.forEach(function(it,i){
-    var canBuy=Math.floor(trools/it.trool);
-    if(canBuy===0)return;
-    html+='<div style="display:flex;align-items:center;gap:10px;">'
-      +'<div style="font-size:.76rem;color:var(--subtext0);min-width:180px;">'+it.name+'</div>'
-      +'<div style="font-size:.65rem;color:var(--overlay0);min-width:90px;">max '+fmtK(canBuy)+' unités</div>'
-      +'<div style="font-size:.65rem;color:var(--overlay0);min-width:65px;">nb vendus :</div>'
-      +'<input class="tei" type="number" placeholder="0" min="0" value="'+(tSimSales[i]||'')+'" oninput="tSimSales['+i+']=parseFloat(this.value)||0;updateTSimRes('+budget+')">'
-      +'</div>';
-  });
-  html+='</div>';
-  document.getElementById('tSimItems').innerHTML=html;
+
+  // Ne re-render les lignes que si elles n'existent pas encore
+  var container = document.getElementById('tSimItems');
+  if(!container.dataset.budget || container.dataset.budget !== String(budget)){
+    var html='<div style="margin:.7rem 0;display:flex;flex-direction:column;gap:5px;">';
+    tItems.forEach(function(it,i){
+      var canBuy=Math.floor(trools/it.trool);
+      if(canBuy===0)return;
+      html+='<div style="display:flex;align-items:center;gap:10px;">'
+        +'<div style="font-size:.76rem;color:var(--subtext0);min-width:180px;">'+it.name+'</div>'
+        +'<div style="font-size:.65rem;color:var(--overlay0);min-width:90px;">max '+fmtK(canBuy)+' unités</div>'
+        +'<div style="font-size:.65rem;color:var(--overlay0);min-width:65px;">nb vendus :</div>'
+        +'<input class="tei" type="text" inputmode="numeric" placeholder="0" value="'+(tSimSales[i]?fmtTei(tSimSales[i]):'')+'" oninput="tSimSales['+i+']=parseTei(this.value)||0;this.value=fmtTei(parseTei(this.value))||this.value;updateTSimRes('+budget+')">'
+        +'</div>';
+    });
+    html+='</div>';
+    container.innerHTML=html;
+    container.dataset.budget=String(budget);
+  }
   updateTSimRes(budget);
 }
 
@@ -1510,7 +1517,7 @@ function renderTroolaton(){
       <div class="tsim-title">Simulateur d&#39;investissement</div>
       <div class="tsim-row">
         <span class="tsim-lbl">Kamas à investir</span>
-        <input class="tei" style="width:140px" type="number" id="tSimBudget" placeholder="ex: 1600000" oninput="calcTSim()">
+        <input class="tei" style="width:140px" type="text" inputmode="numeric" id="tSimBudget" placeholder="ex: 1 600 000" oninput="this.value=fmtTei(parseTei(this.value))||this.value;calcTSim()">
         <span id="tSimTickets" style="font-size:.78rem;font-weight:600;color:var(--blue)"></span>
       </div>
       <div id="tSimItems"></div>

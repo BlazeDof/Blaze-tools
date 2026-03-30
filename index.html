@@ -2062,9 +2062,15 @@ function renderDash(){
     // Carte Ocre
     var dashPerso = ocrePersos.find(function(p){return p.id===ocreActivePersoId;});
     var dashPersoLabel = dashPerso ? dashPerso.name + (dashPerso.classe ? ' — '+dashPerso.classe : '') : '';
-    html += '<div class="dash-card" onclick="setView(\'ocre\')">'
+    var dashPersoOpts = '';
+    ocrePersos.forEach(function(p){
+      dashPersoOpts += '<option value="'+p.id+'"'+(p.id===ocreActivePersoId?' selected':'')+'>'+p.name+(p.classe?' ('+p.classe+')':'')+'</option>';
+    });
+    html += '<div class="dash-card" onclick="setView(\'ocre\')" style="cursor:pointer">'
       +'<div class="dash-card-title">🟠 Tracker Ocre</div>'
-      +(dashPersoLabel?'<div style="font-size:.68rem;color:var(--mauve);font-weight:600;margin-bottom:.5rem">'+dashPersoLabel+'</div>':'')
+      +'<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem">'
+      +'<select class="ocre-perso-select" style="font-size:.68rem;height:26px;min-width:0;flex:1" onclick="event.stopPropagation()" onchange="event.stopPropagation();switchOcrePerso(this.value);renderDash()">'+dashPersoOpts+'</select>'
+      +'</div>'
       +'<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:.4rem">'
       +'<div class="dash-stat"><div class="dash-stat-v" style="color:var(--mauve)">'+ocrePct+'%</div><div class="dash-stat-l">Progression</div></div>'
       +'<div class="dash-stat"><div class="dash-stat-v" style="color:var(--green)">'+ocreDone+'</div><div class="dash-stat-l">Capturés</div></div>'

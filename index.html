@@ -2137,6 +2137,7 @@ var ocreCaptured = {};     // { monsterId: true }
 var ocreFilter = 'all';    // all | monstre | archimonstre | boss
 var ocreSearch = '';
 var ocreShowAll = true;    // false = masquer capturés
+var ocreStep = 0;          // 0 = toutes les étapes
 
 try { ocreCaptured = JSON.parse(localStorage.getItem('alm_ocre') || '{}'); } catch(e) {}
 function saveOcre(){ try { localStorage.setItem('alm_ocre', JSON.stringify(ocreCaptured)); } catch(e) {} triggerAutoSave(); }
@@ -2192,6 +2193,7 @@ function buildOcreView(){
   // Filtrer
   var filtered = ocreData.filter(function(m){
     var t = (typeof m.type === 'string') ? m.type : (m.type && m.type.name && m.type.name.fr)||'';
+    if(ocreStep !== 0 && m.step !== ocreStep) return false;
     if(ocreFilter !== 'all' && t.toLowerCase() !== ocreFilter) return false;
     if(!ocreShowAll && ocreCaptured[m.id]) return false;
     if(ocreSearch){
@@ -2212,9 +2214,14 @@ function buildOcreView(){
   var html = '';
 
   // Toolbar
+  // Build step selector options
+  var stepOpts = '<option value="0"'+(ocreStep===0?' selected':'')+'>Toutes les étapes</option>';
+  steps.forEach(function(s2){ stepOpts += '<option value="'+s2+'"'+(ocreStep===s2?' selected':'')+'>Étape '+s2+' ('+( byStep[s2]||[]).length+')</option>'; });
+
   html += '<div class="ocre-toolbar">'
     +'<div class="swrap"><svg viewBox="0 0 24 24" style="position:absolute;left:9px;top:50%;transform:translateY(-50%);width:13px;height:13px;fill:none;stroke:var(--overlay0);stroke-width:2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>'
     +'<input class="ocre-search sinput" placeholder="Rechercher un monstre..." oninput="ocreSearch=this.value;buildOcreView()" value="'+ocreSearch+'"></div>'
+    +'<select style="background:var(--surface0);border:none;color:var(--text);padding:.15rem .6rem;border-radius:var(--radius-sm);font-size:.75rem;height:30px;outline:none;cursor:pointer;font-family:Inter,sans-serif" onchange="ocreStep=parseInt(this.value);buildOcreView()">'+stepOpts+'</select>'
     +'<div class="ocre-filters">'
     +'<div class="ocre-chip'+(ocreFilter==='all'?' on':'')+'" onclick="ocreFilter=\'all\';buildOcreView()">Tous ('+s.total+')</div>'
     +'<div class="ocre-chip'+(ocreFilter==='archimonstre'?' on':'')+'" onclick="ocreFilter=\'archimonstre\';buildOcreView()" style="'+(ocreFilter==='archimonstre'?'background:rgba(203,166,247,.8);color:var(--mantle)':'')+'">⚡ Archis ('+s.archis+')</div>'

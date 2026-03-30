@@ -495,6 +495,33 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
   .nbtn-hdr { padding:.3rem .6rem !important; font-size:.65rem !important; }
   .saveStatus { display:none !important; }
 }
+/* ── Dashboard ───────────────────────────────────── */
+.dash-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
+.dash-grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:12px; }
+.dash-card { background:var(--mantle); border-radius:var(--radius); padding:1.1rem 1.3rem; border:1.5px solid var(--surface0); transition:all .2s; }
+.dash-card-title { font-size:.6rem; font-weight:700; letter-spacing:.15em; color:var(--overlay0); text-transform:uppercase; margin-bottom:.7rem; display:flex; align-items:center; gap:.4rem; }
+.dash-card-title::after { content:''; flex:1; height:1px; background:var(--surface0); }
+.dash-hero { background:linear-gradient(135deg,var(--mantle),var(--surface0)); border-radius:var(--radius); padding:1.5rem; margin-bottom:12px; border:1.5px solid var(--surface0); display:flex; align-items:center; gap:1.2rem; }
+.dash-hero-img { width:64px; height:64px; background:var(--base); border-radius:var(--radius); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.dash-hero-img img { width:56px; height:56px; image-rendering:pixelated; }
+.dash-hero-info { flex:1; min-width:0; }
+.dash-hero-name { font-size:1.2rem; font-weight:700; color:var(--text); margin-bottom:.3rem; }
+.dash-hero-desc { font-size:.78rem; color:var(--subtext0); line-height:1.5; }
+.dash-hero-badge { font-size:.62rem; font-weight:600; padding:3px 8px; border-radius:4px; display:inline-block; margin-bottom:.4rem; }
+.dash-stat { text-align:center; }
+.dash-stat-v { font-size:1.5rem; font-weight:700; }
+.dash-stat-l { font-size:.6rem; color:var(--overlay0); text-transform:uppercase; letter-spacing:.08em; margin-top:3px; }
+.dash-progress { background:var(--surface0); border-radius:3px; height:8px; margin:.5rem 0; overflow:hidden; }
+.dash-progress-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,var(--mauve),var(--peach)); transition:width .6s; }
+.dash-list-item { display:flex; align-items:center; gap:.5rem; padding:.4rem .5rem; background:var(--surface0); border-radius:var(--radius-sm); margin-bottom:3px; font-size:.75rem; cursor:pointer; transition:background .1s; }
+.dash-list-item:hover { background:var(--surface1); }
+.dash-shortcut { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.4rem; padding:1rem; background:var(--surface0); border-radius:var(--radius); cursor:pointer; transition:all .15s; border:1.5px solid transparent; font-size:.75rem; font-weight:500; color:var(--subtext0); }
+.dash-shortcut:hover { border-color:var(--mauve); color:var(--text); background:var(--surface1); }
+.dash-shortcut-icon { font-size:1.5rem; }
+@media screen and (max-width:768px) {
+  .dash-grid { grid-template-columns:1fr !important; }
+  .dash-grid-3 { grid-template-columns:repeat(2,1fr) !important; }
+}
 </style>
 <body>
 
@@ -515,6 +542,7 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
     <span></span><span></span><span></span>
   </button>
   <div class="hdr-center">
+    <button class="vtab" id="vDash" onclick="setView('dash')">🏠 Accueil</button>
     <div class="vtab-group" id="almanaxGroup">
       <button class="vtab" id="vAlmanax" onclick="toggleAlmanaxMenu()">Almanax &#9662;</button>
       <div class="vtab-dropdown" id="almanaxMenu" style="display:none">
@@ -551,6 +579,7 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
 </header>
 
 <div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-menu-item" onclick="mobileNav('dash')">🏠 Accueil</button>
   <div class="mobile-menu-sep">Almanax</div>
   <button class="mobile-menu-item" onclick="mobileNav('cal')">📅 Calendrier</button>
   <button class="mobile-menu-item" onclick="mobileNav('list')">📋 Liste</button>
@@ -587,6 +616,7 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
 
   <div class="fbar" id="fbar"></div>
 
+  <div id="dashView" style="display:none"><div id="dashContent"></div></div>
   <div id="calView">
     <div class="cal-head">
       <div class="chd">Lun</div><div class="chd">Mar</div><div class="chd">Mer</div>
@@ -715,7 +745,7 @@ var SH=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Dé
 var tod=new Date(); tod.setHours(0,0,0,0);
 var vY=tod.getFullYear(), vM=tod.getMonth();
 var selDate=new Date(tod);
-var filt='all', searchQ='', viewMode='cal';
+var filt='all', searchQ='', viewMode='dash';
 var cache={}, notif=false, listData=[], skipScroll=false;
 var myList={};
 try{var sv=JSON.parse(localStorage.getItem('alm_mylist')||'[]');for(var i=0;i<sv.length;i++)myList[sv[i]]=true;}catch(e){}
@@ -1103,7 +1133,7 @@ function setView(v){
   });
 
   viewMode=v;
-  ['cal','list','mylist','trading','troolaton','recap','notes','ocre'].forEach(function(x){
+  ['dash','cal','list','mylist','trading','troolaton','recap','notes','ocre'].forEach(function(x){
     var btn = document.getElementById('v'+x.charAt(0).toUpperCase()+x.slice(1));
     if(btn) btn.classList.toggle('on',x===v);
     document.getElementById(x+'View').style.display=x===v?'block':'none';
@@ -1111,7 +1141,8 @@ function setView(v){
   document.getElementById('calNav').style.display=v==='cal'?'flex':'none';
   var showFbar = (v==='cal'||v==='list');
   document.getElementById('fbar').style.display=showFbar?'':'none';
-  if(v==='cal'){vY=vY;vM=vM;document.getElementById('mTitle').innerHTML=MO[vM]+' <span>'+vY+'</span>';renderCal();}
+  if(v==='dash'){document.getElementById('mTitle').innerHTML='<span>Accueil</span>';document.getElementById('calNav').style.display='none';renderDash();}
+  else if(v==='cal'){vY=vY;vM=vM;document.getElementById('mTitle').innerHTML=MO[vM]+' <span>'+vY+'</span>';renderCal();}
   else if(v==='list') renderList();
   else if(v==='mylist'){document.getElementById('mTitle').innerHTML='<span>Ma liste</span>';renderML();}
   else if(v==='trading'){document.getElementById('mTitle').innerHTML='<span>Craft &amp; Vente</span>';document.getElementById('calNav').style.display='none';renderTrading();}
@@ -1941,7 +1972,137 @@ function buildRecapView(dates, results){
 }
 
 
-/* ── Mobile ─────────────────────────────────────── */
+/* ── Dashboard ──────────────────────────────────── */
+function renderDash(){
+  var el = document.getElementById('dashContent');
+  el.innerHTML = '<div class="pload"><div class="spin"></div>Chargement...</div>';
+
+  fetchDay(fmt(tod)).then(function(data){
+    var item = (data && data.tribute && data.tribute.item) || {};
+    var qty = (data && data.tribute && data.tribute.quantity) || 1;
+    var bName = (data && data.bonus && data.bonus.type && data.bonus.type.name) || '—';
+    var bDesc = (data && data.bonus && data.bonus.description) || '';
+    var img = (item.image_urls && item.image_urls.icon) || '';
+    var tags = classify(bDesc, bName), cat = getCat(tags[0]);
+    var JOURS = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+
+    // Ocre stats
+    var ocreTotal = OCRE_DATA ? OCRE_DATA.length : 337;
+    var ocreDone = Object.keys(ocreCaptured).length;
+    var ocrePct = Math.round(ocreDone / ocreTotal * 100);
+
+    // Ma liste - prochain
+    var mlKeys = Object.keys(myList).sort();
+    var todStr = fmt(tod);
+    var nextML = null;
+    for(var i=0;i<mlKeys.length;i++){ if(mlKeys[i]>=todStr){nextML=mlKeys[i];break;} }
+
+    // Troolaton quick stats
+    var tTotal = 0, tCapt = 0;
+    if(typeof tItems !== 'undefined') tTotal = tItems.length;
+
+    // Notes count
+    var notesCount = Object.keys(notes||{}).length;
+
+    // History last 3
+    var histHtml = '<div class="dash-card-title">Historique récent</div>';
+
+    var html = '';
+
+    // ── Hero : bonus du jour ──
+    html += '<div class="dash-hero">'
+      +'<div class="dash-hero-img">'+(img?'<img src="'+img+'" alt="">':'<span style="font-size:2rem;opacity:.3">📅</span>')+'</div>'
+      +'<div class="dash-hero-info">'
+      +'<div style="font-size:.62rem;color:var(--overlay0);margin-bottom:.3rem">'+JOURS[tod.getDay()]+' '+tod.getDate()+' '+MO[tod.getMonth()]+' '+tod.getFullYear()+'</div>'
+      +'<div class="dash-hero-badge" style="color:'+cat.fg+';background:'+cat.bg+'">'+cat.label+'</div>'
+      +'<div class="dash-hero-name">'+bName+'</div>'
+      +'<div class="dash-hero-desc">'+bDesc+'</div>'
+      +'</div>'
+      +'<div style="text-align:right;flex-shrink:0">'
+      +'<div style="font-size:.65rem;color:var(--overlay0)">Offrande</div>'
+      +'<div style="font-size:.9rem;font-weight:600;color:var(--text);white-space:nowrap">'+(item.name||'—')+'</div>'
+      +'<div style="font-size:.72rem;color:var(--mauve)">× '+qty+'</div>'
+      +'<button class="addbtn" style="margin-top:.5rem;padding:.3rem .6rem;font-size:.65rem" id="dashAddBtn" onclick="toggleML(\''+todStr+'\')">'+(inML(todStr)?'★ Dans ma liste':'☆ Ajouter')+'</button>'
+      +'</div>'
+      +'</div>';
+
+    // ── Grille principale ──
+    html += '<div class="dash-grid">';
+
+    // Carte Ocre
+    html += '<div class="dash-card" onclick="setView(\'ocre\')">'
+      +'<div class="dash-card-title">🟠 Tracker Ocre</div>'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:.4rem">'
+      +'<div class="dash-stat"><div class="dash-stat-v" style="color:var(--mauve)">'+ocrePct+'%</div><div class="dash-stat-l">Progression</div></div>'
+      +'<div class="dash-stat"><div class="dash-stat-v" style="color:var(--green)">'+ocreDone+'</div><div class="dash-stat-l">Capturés</div></div>'
+      +'<div class="dash-stat"><div class="dash-stat-v" style="color:var(--overlay0)">'+(ocreTotal-ocreDone)+'</div><div class="dash-stat-l">Restants</div></div>'
+      +'</div>'
+      +'<div class="dash-progress"><div class="dash-progress-fill" style="width:'+ocrePct+'%"></div></div>'
+      +'<div style="font-size:.65rem;color:var(--overlay0)">'+ocreDone+' / '+ocreTotal+' monstres</div>'
+      +'</div>';
+
+    // Carte Ma liste
+    var mlUpcoming = mlKeys.filter(function(k){return k>=todStr;}).length;
+    var mlTotal = mlKeys.length;
+    html += '<div class="dash-card" onclick="setView(\'mylist\')">'
+      +'<div class="dash-card-title">⭐ Ma liste</div>';
+    if(nextML){
+      var parts=nextML.split('-'), nd=new Date(parseInt(parts[0]),parseInt(parts[1])-1,parseInt(parts[2]));
+      var diff=Math.round((nd-tod)/(1000*60*60*24));
+      html += '<div style="font-size:.75rem;color:var(--subtext0);margin-bottom:.5rem">'
+        +(diff===0?'<span style="color:var(--blue);font-weight:600">Aujourd\'hui !</span>':diff===1?'<span style="color:var(--peach);font-weight:600">Demain</span>':'<span>Dans <strong style="color:var(--text)">'+diff+'</strong> jours</span>')
+        +' — '+JOURS[nd.getDay()]+' '+nd.getDate()+' '+MO[nd.getMonth()]
+        +'</div>';
+    }
+    html += '<div style="display:flex;gap:1rem">'
+      +'<div class="dash-stat"><div class="dash-stat-v" style="color:var(--pink)">'+mlTotal+'</div><div class="dash-stat-l">Total</div></div>'
+      +'<div class="dash-stat"><div class="dash-stat-v" style="color:var(--blue)">'+mlUpcoming+'</div><div class="dash-stat-l">À venir</div></div>'
+      +'</div>'
+      +'</div>';
+
+    html += '</div>'; // end dash-grid
+
+    // ── Raccourcis ──
+    html += '<div class="dash-grid-3">'
+      +'<div class="dash-shortcut" onclick="setView(\'cal\')"><div class="dash-shortcut-icon">📅</div>Calendrier</div>'
+      +'<div class="dash-shortcut" onclick="setView(\'list\')"><div class="dash-shortcut-icon">📋</div>Liste</div>'
+      +'<div class="dash-shortcut" onclick="setView(\'recap\')"><div class="dash-shortcut-icon">📊</div>Récap mensuel</div>'
+      +'<div class="dash-shortcut" onclick="setView(\'trading\')"><div class="dash-shortcut-icon">💰</div>Craft &amp; Vente</div>'
+      +'<div class="dash-shortcut" onclick="setView(\'troolaton\')"><div class="dash-shortcut-icon">🎰</div>Troolaton</div>'
+      +'<div class="dash-shortcut" onclick="setView(\'notes\')"><div class="dash-shortcut-icon">📝</div>Bloc-note <span style="color:var(--overlay0);font-size:.65rem">('+notesCount+')</span></div>'
+      +'</div>';
+
+    // ── Historique récent ──
+    html += '<div class="dash-card"><div class="dash-card-title">Historique récent</div><div id="dashHist"><div style="color:var(--overlay0);font-size:.78rem">Chargement...</div></div></div>';
+
+    el.innerHTML = html;
+
+    // Charger historique
+    var dates=[];
+    for(var i=1;i<=5;i++){var d=new Date(tod);d.setDate(tod.getDate()-i);dates.push(d);}
+    Promise.all(dates.map(function(d){return fetchDay(fmt(d)).then(function(data){return {date:d,data:data};});}))
+      .then(function(res){
+        var hh='';
+        res.forEach(function(r){
+          if(!r.data)return;
+          var nm=(r.data.bonus&&r.data.bonus.type&&r.data.bonus.type.name)||'—';
+          var dc=(r.data.bonus&&r.data.bonus.description)||'';
+          var tgs=classify(dc,nm),c=getCat(tgs[0]),ds=fmt(r.date);
+          var img2=(r.data.tribute&&r.data.tribute.item&&r.data.tribute.item.image_urls&&r.data.tribute.item.image_urls.icon)||'';
+          hh+='<div class="dash-list-item" onclick="sel(\''+ds+'\');setView(\'cal\')">'
+            +(img2?'<img src="'+img2+'" style="width:24px;height:24px;image-rendering:pixelated;border-radius:3px;flex-shrink:0">':'')
+            +'<span style="font-size:.65rem;color:var(--overlay0);flex-shrink:0">'+r.date.getDate()+' '+SH[r.date.getMonth()]+'</span>'
+            +'<span class="lbadge" style="color:'+c.fg+';background:'+c.bg+';flex-shrink:0">'+c.label+'</span>'
+            +'<span style="color:var(--subtext0);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+nm+'</span>'
+            +'</div>';
+        });
+        var histEl=document.getElementById('dashHist');
+        if(histEl) histEl.innerHTML=hh||'<div style="color:var(--overlay0);font-size:.78rem">Aucun historique</div>';
+      });
+  });
+}
+
+
 function toggleMobileMenu(){
   var m = document.getElementById('mobileMenu');
   m.classList.toggle('open');
@@ -2309,8 +2470,11 @@ function importData(event){
 
 try{if(localStorage.getItem('alm_n')){notif=true;updateNBtn();}}catch(e){}
 buildFBar(); updateMLCount();
+// Init calendar in background but show dashboard
 renderCal();
 setTimeout(function(){sel(fmt(tod));loadHistory();loadNextML();},60);
+// Show dashboard on load
+setView('dash');
 fetchDay(fmt(tod)).then(function(data){
   if(!data) return;
   var nm=(data.bonus&&data.bonus.type&&data.bonus.type.name)||'';

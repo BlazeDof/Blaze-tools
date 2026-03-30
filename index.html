@@ -406,6 +406,34 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
 .tbar-fill{height:100%;border-radius:3px;transition:width .3s;}
 @keyframes fi { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:none; } }
 /* ── Ocre tracker ────────────────────────────────── */
+/* ── Ocre perso system ────────────────────────────── */
+.ocre-perso-bar { display:flex; align-items:center; gap:.6rem; margin-bottom:1rem; flex-wrap:wrap; }
+.ocre-perso-select { background:var(--surface0); border:1.5px solid var(--surface1); color:var(--text); padding:.3rem .7rem; border-radius:var(--radius-sm); font-size:.75rem; font-family:'Inter',sans-serif; cursor:pointer; outline:none; height:32px; min-width:140px; }
+.ocre-perso-select:focus { border-color:var(--mauve); }
+.ocre-perso-btn { background:var(--surface0); border:none; color:var(--subtext0); padding:.3rem .7rem; border-radius:var(--radius-sm); font-size:.72rem; font-weight:500; cursor:pointer; transition:all .15s; font-family:'Inter',sans-serif; height:32px; display:flex; align-items:center; gap:.3rem; }
+.ocre-perso-btn:hover { background:var(--surface1); color:var(--text); }
+.ocre-perso-label { font-size:.6rem; font-weight:700; letter-spacing:.12em; color:var(--overlay0); text-transform:uppercase; }
+.ocre-modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:500; display:flex; align-items:center; justify-content:center; }
+.ocre-modal { background:var(--mantle); border:1.5px solid var(--surface1); border-radius:var(--radius); padding:1.5rem; width:420px; max-width:92vw; max-height:80vh; overflow-y:auto; box-shadow:0 8px 32px rgba(0,0,0,.5); }
+.ocre-modal-title { font-size:.95rem; font-weight:700; color:var(--text); margin-bottom:1rem; display:flex; align-items:center; justify-content:space-between; }
+.ocre-modal-close { background:none; border:none; color:var(--overlay0); cursor:pointer; font-size:1.1rem; padding:.2rem; }
+.ocre-modal-close:hover { color:var(--text); }
+.ocre-perso-card { background:var(--surface0); border-radius:var(--radius-sm); padding:.7rem .85rem; margin-bottom:.5rem; display:flex; align-items:center; gap:.7rem; }
+.ocre-perso-card.active { border-left:3px solid var(--mauve); }
+.ocre-perso-card-info { flex:1; min-width:0; }
+.ocre-perso-card-name { font-size:.82rem; font-weight:600; color:var(--text); }
+.ocre-perso-card-class { font-size:.65rem; color:var(--overlay1); margin-top:1px; }
+.ocre-perso-card-prog { font-size:.62rem; color:var(--mauve); font-weight:600; }
+.ocre-perso-card-actions { display:flex; gap:4px; }
+.ocre-perso-card-actions button { background:none; border:none; color:var(--overlay0); cursor:pointer; font-size:.8rem; padding:.2rem .3rem; border-radius:3px; transition:all .1s; }
+.ocre-perso-card-actions button:hover { background:var(--surface1); color:var(--text); }
+.ocre-perso-card-actions button.del:hover { color:var(--red); }
+.ocre-modal-form { display:flex; gap:.4rem; margin-top:.8rem; }
+.ocre-modal-form input, .ocre-modal-form select { background:var(--surface0); border:1.5px solid var(--surface1); color:var(--text); padding:.35rem .6rem; border-radius:var(--radius-sm); font-size:.75rem; font-family:'Inter',sans-serif; outline:none; }
+.ocre-modal-form input:focus, .ocre-modal-form select:focus { border-color:var(--mauve); }
+.ocre-modal-form input { flex:1; }
+.ocre-modal-form button { background:var(--mauve); border:none; color:var(--mantle); padding:.35rem .8rem; border-radius:var(--radius-sm); font-size:.72rem; font-weight:600; cursor:pointer; font-family:'Inter',sans-serif; white-space:nowrap; }
+.ocre-modal-form button:hover { opacity:.85; }
 .ocre-toolbar { display:flex; align-items:center; gap:.8rem; flex-wrap:wrap; margin-bottom:1.2rem; }
 .ocre-progress-wrap { background:var(--surface0); border-radius:var(--radius-sm); padding:.7rem 1rem; margin-bottom:1.2rem; display:flex; align-items:center; gap:1rem; }
 .ocre-progress-bar-wrap { flex:1; background:var(--surface1); border-radius:3px; height:8px; }
@@ -2030,8 +2058,11 @@ function renderDash(){
     html += '<div class="dash-grid">';
 
     // Carte Ocre
+    var dashPerso = ocrePersos.find(function(p){return p.id===ocreActivePersoId;});
+    var dashPersoLabel = dashPerso ? dashPerso.name + (dashPerso.classe ? ' — '+dashPerso.classe : '') : '';
     html += '<div class="dash-card" onclick="setView(\'ocre\')">'
       +'<div class="dash-card-title">🟠 Tracker Ocre</div>'
+      +(dashPersoLabel?'<div style="font-size:.68rem;color:var(--mauve);font-weight:600;margin-bottom:.5rem">'+dashPersoLabel+'</div>':'')
       +'<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:.4rem">'
       +'<div class="dash-stat"><div class="dash-stat-v" style="color:var(--mauve)">'+ocrePct+'%</div><div class="dash-stat-l">Progression</div></div>'
       +'<div class="dash-stat"><div class="dash-stat-v" style="color:var(--green)">'+ocreDone+'</div><div class="dash-stat-l">Capturés</div></div>'
@@ -2139,8 +2170,144 @@ var ocreSearch = '';
 var ocreShowAll = true;    // false = masquer capturés
 var ocreStep = 0;          // 0 = toutes les étapes
 
-try { ocreCaptured = JSON.parse(localStorage.getItem('alm_ocre') || '{}'); } catch(e) {}
-function saveOcre(){ try { localStorage.setItem('alm_ocre', JSON.stringify(ocreCaptured)); } catch(e) {} triggerAutoSave(); }
+/* ── Multi-perso Ocre ─────────────────────────────── */
+var DOFUS_CLASSES = ['Crâ','Ecaflip','Eliotrope','Eniripsa','Enutrof','Féca','Forgelance','Huppermage','Iop','Osamodas','Ouginak','Pandawa','Roublard','Sacrieur','Sadida','Sram','Steamer','Xélor','Zobal'];
+var ocrePersos = [];       // [{id,name,classe}]
+var ocreActivePersoId = null;
+
+function loadOcrePersos(){
+  try { ocrePersos = JSON.parse(localStorage.getItem('alm_ocre_persos') || '[]'); } catch(e){ ocrePersos=[]; }
+  try { ocreActivePersoId = localStorage.getItem('alm_ocre_active') || null; } catch(e){}
+  // Migration: si ancien format existe et pas de persos
+  if(ocrePersos.length === 0){
+    var oldData = null;
+    try { oldData = JSON.parse(localStorage.getItem('alm_ocre') || 'null'); } catch(e){}
+    if(oldData && Object.keys(oldData).length > 0){
+      var migId = 'p_' + Date.now();
+      ocrePersos = [{id:migId, name:'Perso 1', classe:''}];
+      ocreActivePersoId = migId;
+      try { localStorage.setItem('alm_ocre_' + migId, JSON.stringify(oldData)); } catch(e){}
+      saveOcrePersos();
+    }
+  }
+  // Si toujours rien, créer un perso par défaut
+  if(ocrePersos.length === 0){
+    var defId = 'p_' + Date.now();
+    ocrePersos = [{id:defId, name:'Perso 1', classe:''}];
+    ocreActivePersoId = defId;
+    saveOcrePersos();
+  }
+  // Valider perso actif
+  if(!ocreActivePersoId || !ocrePersos.find(function(p){return p.id===ocreActivePersoId;})){
+    ocreActivePersoId = ocrePersos[0].id;
+    try { localStorage.setItem('alm_ocre_active', ocreActivePersoId); } catch(e){}
+  }
+  loadOcreCaptures();
+}
+function saveOcrePersos(){
+  try { localStorage.setItem('alm_ocre_persos', JSON.stringify(ocrePersos)); } catch(e){}
+  try { localStorage.setItem('alm_ocre_active', ocreActivePersoId); } catch(e){}
+  triggerAutoSave();
+}
+function loadOcreCaptures(){
+  try { ocreCaptured = JSON.parse(localStorage.getItem('alm_ocre_' + ocreActivePersoId) || '{}'); } catch(e){ ocreCaptured={}; }
+}
+function saveOcre(){
+  try { localStorage.setItem('alm_ocre_' + ocreActivePersoId, JSON.stringify(ocreCaptured)); } catch(e){}
+  // Compat ancien format
+  try { localStorage.setItem('alm_ocre', JSON.stringify(ocreCaptured)); } catch(e){}
+  triggerAutoSave();
+}
+function switchOcrePerso(id){
+  ocreActivePersoId = id;
+  try { localStorage.setItem('alm_ocre_active', id); } catch(e){}
+  loadOcreCaptures();
+  buildOcreView();
+}
+function addOcrePerso(name, classe){
+  if(!name.trim()) return;
+  var id = 'p_' + Date.now();
+  ocrePersos.push({id:id, name:name.trim(), classe:classe||''});
+  saveOcrePersos();
+  switchOcrePerso(id);
+  toast('✅ ' + name.trim() + ' ajouté !');
+}
+function renameOcrePerso(id, newName, newClasse){
+  var p = ocrePersos.find(function(x){return x.id===id;});
+  if(p){
+    if(newName!==undefined) p.name = newName.trim()||p.name;
+    if(newClasse!==undefined) p.classe = newClasse;
+    saveOcrePersos();
+    buildOcreView();
+  }
+}
+function deleteOcrePerso(id){
+  if(ocrePersos.length <= 1){ toast('❌ Il faut au moins un personnage'); return; }
+  var p = ocrePersos.find(function(x){return x.id===id;});
+  if(!p) return;
+  if(!confirm('Supprimer "' + p.name + '" et toutes ses captures ?')) return;
+  ocrePersos = ocrePersos.filter(function(x){return x.id!==id;});
+  try { localStorage.removeItem('alm_ocre_' + id); } catch(e){}
+  if(ocreActivePersoId === id){
+    ocreActivePersoId = ocrePersos[0].id;
+    loadOcreCaptures();
+  }
+  saveOcrePersos();
+  buildOcreView();
+  toast('🗑️ Personnage supprimé');
+}
+function getOcrePersoCaptures(id){
+  try { return JSON.parse(localStorage.getItem('alm_ocre_' + id) || '{}'); } catch(e){ return {}; }
+}
+function showOcrePersoModal(){
+  var overlay = document.createElement('div');
+  overlay.className = 'ocre-modal-overlay';
+  overlay.id = 'ocrePersoModal';
+  overlay.onclick = function(e){ if(e.target===overlay) overlay.remove(); };
+  var total = ocreData ? ocreData.length : 337;
+  var cardsHtml = '';
+  ocrePersos.forEach(function(p){
+    var capts = getOcrePersoCaptures(p.id);
+    var done = Object.keys(capts).length;
+    var pct = Math.round(done/total*100);
+    var isActive = p.id === ocreActivePersoId;
+    cardsHtml += '<div class="ocre-perso-card'+(isActive?' active':'')+'">'
+      +'<div style="font-size:1.2rem;flex-shrink:0">'+(isActive?'🟢':'⚪')+'</div>'
+      +'<div class="ocre-perso-card-info">'
+      +'<div class="ocre-perso-card-name">'+p.name+(p.classe?' <span style="color:var(--overlay1);font-weight:400;font-size:.72rem">— '+p.classe+'</span>':'')+'</div>'
+      +'<div class="ocre-perso-card-prog">'+done+'/'+total+' — '+pct+'%</div>'
+      +'</div>'
+      +'<div class="ocre-perso-card-actions">'
+      +'<button title="Renommer" onclick="promptRenameOcrePerso(\''+p.id+'\')">✏️</button>'
+      +'<button class="del" title="Supprimer" onclick="deleteOcrePerso(\''+p.id+'\');document.getElementById(\'ocrePersoModal\').remove();showOcrePersoModal();">🗑️</button>'
+      +'</div>'
+      +'</div>';
+  });
+  var classeOpts = '<option value="">— Classe —</option>';
+  DOFUS_CLASSES.forEach(function(c){ classeOpts += '<option value="'+c+'">'+c+'</option>'; });
+  overlay.innerHTML = '<div class="ocre-modal">'
+    +'<div class="ocre-modal-title">Gestion des personnages <button class="ocre-modal-close" onclick="document.getElementById(\'ocrePersoModal\').remove();buildOcreView()">✕</button></div>'
+    +cardsHtml
+    +'<div class="ocre-modal-form">'
+    +'<input id="ocreNewPersoName" placeholder="Nom du perso..." maxlength="24">'
+    +'<select id="ocreNewPersoClasse">'+classeOpts+'</select>'
+    +'<button onclick="addOcrePerso(document.getElementById(\'ocreNewPersoName\').value,document.getElementById(\'ocreNewPersoClasse\').value);document.getElementById(\'ocrePersoModal\').remove();showOcrePersoModal();">+ Ajouter</button>'
+    +'</div>'
+    +'</div>';
+  document.body.appendChild(overlay);
+}
+function promptRenameOcrePerso(id){
+  var p = ocrePersos.find(function(x){return x.id===id;});
+  if(!p) return;
+  var newName = prompt('Nouveau nom :', p.name);
+  if(newName === null) return;
+  var newClasse = prompt('Classe (laisser vide pour garder) :', p.classe);
+  renameOcrePerso(id, newName, newClasse!==null?newClasse:undefined);
+  document.getElementById('ocrePersoModal').remove();
+  showOcrePersoModal();
+}
+
+loadOcrePersos();
 
 var OCRE_IMG_DIRECT = {"Blop Coco Royal": "blop_coco_royal.png", "Blop Griotte Royal": "blop_griotte_royal.png", "Blop Indigo Royal": "blop_indigo_royal.png", "Blop Reinette Royal": "blop_reinette_royal.png", "Bouftou Royal": "bouftou_royal.png", "Bworkette": "bworkette.png", "Choudini": "choudini.png", "Dragon Cochon": "dragon_cochon.png", "Gelée Royale Bleuet": "gelee_royale_bleuet.png", "Gelée Royale Menthe": "gelee_royale_menthe.png", "Minotoror": "minotoror.png", "Mob l'Éponge": "mob_l_eponge.png", "Rakoopeur": "rakoopeur.png", "Rat Blanc": "rat_blanc.png", "Rat Noir": "rat_noir.png", "Reine Nyée": "reine_nyee.png", "Scarabosse Doré": "scarabosse_dore.png", "Shin Larve": "shin_larve.png", "Tofu Royal": "tofu_royal.png", "Tournesol Affamé": "tournesol_affame.png", "Abraknyde Ancestral": "abraknyde_ancestral.png", "Blop Multicolore Royal": "blop_multicolore_royal.png", "Corailleur Magistral": "corailleur_magistral.png", "Craqueleur Légendaire": "craqueleur_legendaire.png", "Damadrya": "damadrya.png", "Gelée Royale Fraise": "gelee_royale_fraise.png", "Gourlo le Terrible": "gourlo_le_terrible.png", "Hanshi": "hanshi.png", "Hell Mina": "hell_mina.png", "Koulosse": "koulosse.png", "Maître Corbac": "maitre_corbac.png", "Meulou": "meulou.png", "Moon": "moon.png", "Skeunk": "skeunk.png", "Tanukouï San": "tanukoui_san.png", "Tynril Ahuri": "tynril_ahuri.png", "Tynril Consterné": "tynril_consterne.png", "Tynril Déconcerté": "tynril_deconcerte.png", "Tynril Perfide": "tynril_perfide.png", "Wa Wabbit": "wa_wabbit.png", "Bworker": "bworker.png", "Chêne Mou": "chene_mou.png", "Crocabulia": "crocabulia.png", "Founoroshi": "founoroshi.png", "Gelée Royale Citron": "gelee_royale_citron.png", "Haute Truche": "haute_truche.png", "Kimbo": "kimbo.png", "Minotot": "minotot.png", "Ougah": "ougah.png", "Silf le Rasboul Majeur": "silf_le_rasboul_majeur.png", "Sphincter Cell": "sphincter_cell.png", "Arachitik la Souffreteuse": "arakne_malade.png", "Araknay la Galopante": "arakne_des_egouts.png", "Arakule la Revancharde": "arakne.png", "Boudalf le Blanc": "boufton_blanc.png", "Boulgourvil le Lointain": "boufton_noir.png", "Chamchie le Difficile": "champ_champ.png", "Craraboss le Féérique": "crabe.png", "Larvonika l'Instrument": "larve_bleue.png", "Mosketère le Dévoué": "moskito.png", "Pioufe la Maquillée": "piou_rose.png", "Pioukas la Plante": "piou_vert.png", "Pioulbrineur le Mercenaire": "piou_jaune.png", "Pioulette la Coquine": "piou_rouge.png", "Pioussokrim le Délétère": "piou_violet.png", "Pioustone le Problème": "piou_bleu.png", "Pissdane l'Insipide": "pissenlit_diabolique.png", "Sousourizoto le Collant": "sousouris_grise.png", "Tofuldebeu l'Explosif": "tofu.png", "Tofumanchou l'Empereur": "tofu_malefique.png", "Tofurapin le Pétri": "tofu_malade.png", "Bandapar l'Exclu": "bandit_manchot.png", "Bandson le Tonitruant": "bandit_du_clan_des_roublards.png", "Boudur le Raide": "boulanger_sombre.png", "Boufdégou le Refoulant": "bouftou.png", "Gelanal le Huileux": "gelee_bleuet.png", "Geloliaine l'Aérien": "gelee_menthe.png", "Gobstiniais le Têtu": "gobet.png", "Kolforthe l'Indécollable": "kolerat.png", "Kwoanneur le Frimeur": "kwoan.png", "Larchimaide la Poussée": "larve_verte.png", "Larvapstrè le Subjectif": "larve_orange.png", "Nodkoku le Trahi": "nodkoko.png", "Roz la Magicienne": "rose_demoniaque.png", "Serpistol l'Illustre": "serpentin.png", "Tikosto le Mousse": "tikoko.png", "Tiwa'Missou le Gateux": "black_tiwabbit.png", "Tiwalpé le Dévêtu": "tiwabbit.png", "Tiwoflan le Lâche": "tiwabbit_kiafin.png", "Tour le Vice": "tournesol_sauvage.png", "Trukul le Lent": "trukikol.png", "Bi le Partageur": "biblop_griotte.png", "Bilvoezé le Bonimenteur": "biblop_coco.png", "Bistou le Quêteur": "biblop_indigo.png", "Bistou le Rieur": "biblop_reinette.png", "Boostif l'Affamé": "boo.png", "Bouflet le Puéril": "chef_de_guerre_bouftou.png", "Champayr le Disjoncté": "champa_vert.png", "Chevaustine le Reconstruit": "gob_trotteur.png", "Chonstip la Passagère": "cochon_de_lait.png", "Cromikay le Néophyte": "croc_gland.png", "Étoilette la Bouchée": "etoile_de_la_mer_d_asse.png", "Milipussien le Géant": "milirat_strubien.png", "Porfavor le Quémandeur": "berger_porkass.png", "Preskapwal le Tendancieux": "prespic.png", "Robiolego l'Assemblé": "robionicle.png", "Sangria le Fruité": "sanglier.png", "Tortenssia la Fleurie": "tortue_bleue.png", "Torthur la Lutte": "tortue_jaune.png", "Vampunor le Glacial": "vampire.png", "Wabbitud le Constant": "wabbit.png", "Bambouské le Camouflé": "bambouto.png", "Bwormage le Respectueux": "bwork_mage.png", "Corpat le Vampire": "corbac.png", "Crognan le Barbare": "croc_gland.png", "Fourapin le Chaud": "fourbasse.png", "Maître Amboat le Moqueur": "maitre_vampire.png", "Milipatte la Griffe": "milimulou.png", "Minoskour le Sauveur": "minoskito.png", "Minsinistre l'Elu": "mineur_sombre.png", "Neufedur le Flottant": "noeul.png", "Pichakoté le Dégoutant": "pichon_vert.png", "Pichdourse le Puissant": "pichon_bleu.png", "Pichduitre le Totem": "pichon_blanc.png", "Pichtoire l'Erudit": "pichon_orange.png", "Robocoop l'Échangé": "robot_fleau.png", "Rostensyl la Cuisinière": "rose_obscure.png", "Tortilleur le Coulé": "tortue_verte.png", "Tortorak le Cornu": "tortue_rouge.png", "Wagnagnah le Sanglant": "black_wabbit.png", "Abrakroc l'édenté": "abraknyde.png", "Bworkasse le Dégoutant": "bwork.png", "Chafalfer l'Optimiste": "chafer_invisible.png", "Chamdblé le Cultivé": "champa_rouge.png", "Chamflay le Ballonné": "champa_marron.png", "Champayt l'Odorant": "champa_bleu.png", "Crakmitaine le Faucheur": "craqueleur.png", "Craquetuss le Piquant": "craqueboule.png", "Draglida la Disparue": "dragodinde_amande_sauvage.png", "Garsim le Mort": "gargrouille.png", "Gelaviv le Glaçon": "gelee_fraise.png", "Krapahut le Randonneur": "kramelehon.png", "Mallopiée l'Épineuse": "malle_outillee.png", "Mandalo l'Aqueuse": "mandrine.png", "Ribibi le Cher": "rib.png", "Scapé l'Epée": "scarafeuille_blanc.png", "Scaramel le Fondant": "scarafeuille_vert.png", "Scarfayss le Balafré": "scarafeuille_bleu.png", "Scarouarze l'Epopée": "scarafeuille_rouge.png", "Watdogue le Bien Nommé": "wabbit_squelette.png", "Abrakadnuzar": "abrakne.png", "Blof l'Apathique": "blop_reinette.png", "Bloporte le Veule": "blop_indigo.png", "Blordur l'Infect": "blop_griotte.png", "Blorie l'Assourdissante": "blop_coco.png", "Boombata le Garde": "boomba.png", "Bulsavon le Gonflé": "bulbuisson.png", "Chafemal le Bagarreur": "chafer.png", "Chaffoin le Sournois": "chafer_fantassin.png", "Crolnareff l'Exilé": "crocodaille.png", "Cruskof le Rustre": "crustorail_morito.png", "Crustensyl le Pragmatique": "crustorail_malibout.png", "Crustterus l'Organique": "crustorail_kouracao.png", "Dragnoute l'Irascible": "dragodinde_rousse_sauvage.png", "Farlon l'Enfant": "cochon_de_farle.png", "Larvomatik le Propre": "larve_jaune.png", "Radoutable le Craint": "scelerat_strubien.png", "Scaratyn l'Huître": "scaratos.png", "Scorpitène l'Enflammé": "scorbute.png", "Tronkoneuz la Tranchante": "tronknyde.png", "Aboudbra le Porteur": "aboub.png", "Ameur la Laide": "amlub.png", "Arabord la Cruche": "arakne_majeure.png", "Cavordemal le Sorcier": "cavalier_porkass.png", "Chafmarcel le Fêtard": "chafer_archer.png", "Chalan le Commerçant": "chafer_lancier.png", "Codenlgaz le Problème": "codem.png", "Crusmeyer le Pervers": "crustorail_passaoh.png", "Floriste la Cannibale": "floristile.png", "Forboyar l'Enigmatique": "forgeron_sombre.png", "Ginsenk le Stimulant": "gink.png", "Grandilok le Clameur": "grand_pa_wabbit.png", "Kiroyal le Sirupeux": "kirevam.png", "Koktèle le Secoué": "kokoko.png", "Let le Rond": "let_emoliug.png", "Nelvin le Boulet": "nebgib.png", "Nipulnislip l'Exhibitionniste": "nipul.png", "Osuxion le Vampirique": "osurc.png", "Susbewl l'Hypocrite": "susej.png", "Wokènrôl le Danseur": "wo_wabbit.png", "Abrakildas le Vénérable": "abraknyde_venerable.png", "Chafrit le Barbare": "chafer_d_elite.png", "Cramikaz le Suicidaire": "craqueleur_des_plaines.png", "Craquetou le Fissuré": "craqueboule_poli.png", "Doktopuss le Maléfique": "dok_alako.png", "Germinol l'Indigent": "gamino.png", "Grenuche la Gentille": "grenufar.png", "Kannibal le Lecteur": "kanniboul_ark.png", "Kapota la Fraise": "kanniboul_jav.png", "Koalastrof la Naturelle": "koalak_immature.png", "Koko la Violente": "kokom.png", "Maître Champeur le Sabreur": "maitre_bolet.png", "Ouashouash l'Exubérant": "le_ouassingue_entourbe.png", "Ouassébo l'Esthète": "le_ouassingue.png", "Ouature la Mobile": "la_ouassingue.png", "Palmiche le Serein": "palmifleur_morito.png", "Palmiflette le Convivial": "palmifleur_passaoh.png", "Palmito le Menteur": "palmifleur_malibout.png", "Ramitant le Dilettante": "ramane_d_egoutant.png", "Sampi l'Eternel": "sanglier_des_plaines.png", "Akaka le Souillé": "akakwa.png", "Bebetto l'Intellectuel": "betto.png", "Corboyard l'Enigmatique": "corailleur.png", "Dragioli le Succulent": "dragace.png", "Kannémik le Maigre": "kanniboul_sarbak.png", "Kannisterik le Forcené": "kanniboul_eth.png", "Kwakamole l'Appétissant": "kwak_de_terre.png", "Kwaké le Piraté": "kwak_de_vent.png", "Kwakolak le Chocolaté": "kwak_de_flamme.png", "Kwakwatique le Trempé": "kwak_de_glace.png", "Moumoute la Douce": "moumoule.png", "Ougaould le Parasite": "chafer_draugr.png", "Palmbytch la Bronzée": "palmifleur_kouracao.png", "Parapadkouï l'Émasculé": "parashukoui.png", "Porsalé le Râleur": "porsalu.png", "Ratlbol l'Aigri": "rat_d_egoutant.png", "Rauligo le Sale": "raul_mops.png", "Sarkastik l'Incompris": "sarkapwane.png", "Serpistule le Purulent": "serpiplume.png", "Vétaurine l'Énergisé": "vetauran.png", "Barebourd le Comte": "barbroussa.png", "Caboume l'Artilleur": "canondorf.png", "Chiendanlémin l'Illusionniste": "chiendent.png", "Dragkouine la Déguisée": "dragoeuf_argile.png", "Dragmoclaiss le Fataliste": "dragoeuf_ardoise.png", "Dragnostik le Sceptique": "dragoeuf_charbon.png", "Dragstayr le Fonceur": "dragoeuf_calcaire.png", "Fandanleuil le Précis": "fantome_aux_plates.png", "Fanlabiz le Véloce": "fantome_apero.png", "Fantoch le Pantin": "fantome_hicide.png", "Fantrask la Rêveuse": "fantome_egerie.png", "Koakofrui le Confit": "koalak_griotte.png", "Koamaembair le Coulant": "koalak_coco.png", "Koarmit la Batracienne": "koalak_reinette.png", "Koaskette la Chapelière": "koalak_indigo.png", "Nakuneuye le Borgne": "nakunbra.png", "Nerdeubeu le Flagellant": "nerbe.png", "Ratéhaifaim le Professeur": "rat_d_hyoactif.png", "Sparoket le Lanceur": "sparo.png", "Tilolo la Bien Moulée": "lolojiki.png", "Alhoui le Répondeur": "alhyene.png", "Bonpake le Chavireur": "ishigro_pake.png", "Bourde le Maladroit": "bourdard.png", "Crathdogue le Cruel": "craqueleur_poli.png", "Crok le Beau": "chef_crocodaille.png", "Dragonienne l'Econome": "dragueuse.png", "Félyssion la Gourmande": "felygiene.png", "Fouflay le Retombé": "foufayteur.png", "Guerrite le Veilleur": "guerrier_koalak.png", "Kanasukr le Mielleux": "kanigrou.png", "Kanibière l'Encordée": "kaniblou.png", "Kido l'Âtre": "kido.png", "Kilimanj'haro le Grimpeur": "kilibriss.png", "Larvaloeil l'Émue": "larve_champetre.png", "Mufguedin le Suprême": "mufafah.png", "Muloufok l'Hilarant": "mulou.png", "Orfélyre le Charmeur": "orfelin.png", "Pantacour le Long": "panthegros.png", "Souristiti l'Immortalisée": "souris_verte.png", "Toufou le Benêt": "bitouf_des_plaines.png", "Abrakanette l'Encapsulé": "abraknyde_sombre.png", "Abraklette le Fondant": "abrakne_sombre.png", "Bitoven le Musicien": "bitouf_sombre.png", "Brouste l'Humiliant": "brouture.png", "Craquecrac l'Endurant": "craquelourd.png", "Diskord le Belliqueux": "disciple_zoth.png", "Dragdikal le Décisif": "dragnarok.png", "Dragobert le Monarque": "draguaindrop.png", "Fossamoel le Juteux": "fossoyeur_koalak.png", "Gloubibou le Gars": "gloutovore.png", "Inopenope le Négatif": "ino_naru.png", "Koamag'oel le Défiguré": "chevaucheur_koalak.png", "Koasossyal le Psychopathe": "koalak_forestier.png", "Lichangora l'Immaculée": "lichangoro.png", "Meuroup le Prêtre": "meupette.png", "Pékeutar le Tireur": "pekeualak.png", "Piradain le Pingre": "piralak.png", "Rooroku l'Imposant": "kurookin.png", "Tétonée la Plantureuse": "tetonuki.png", "Warkolad l'Etreinte": "warko_marron.png", "Abrakine le Sombre": "abrakleur_sombre.png", "Bouliver le Géant": "bourbassingue.png", "Drageaufol la Joyeuse": "dragoss_ardoise.png", "Dragminster le Magicien": "dragoss_calcaire.png", "Dragtarus le Bellâtre": "dragoss_argile.png", "Drakolage le Tentateur": "drakoalak.png", "Draquetteur le Voleur": "dragoss_charbon.png", "Ecorfé la Vive": "fecorce.png", "Faufoll la Joyeuse": "fauchalak.png", "Floanna la Blonde": "floribonde.png", "Gastroth la Contagieuse": "gamine_zoth.png", "Guerumoth le Collant": "guerrier_zoth.png", "Koalaboi le Calorifère": "koalak_farouche.png", "Koalvissie le Chauve": "koalak_sanguin.png", "Mamakomou l'Âge": "mama_koalak.png", "Momikonos la Bandelette": "momie_koalak.png", "Pétarfoutu le Mouillé": "petartifoux.png", "Tourbiket le Virevoletant": "tourbassingue.png", "Wara l'Amer": "warko_violet.png", "Abrinos le Clair": "abrakleur_clair.png", "Bigbadaboum l'Élémentaire": "boumbardier.png", "Chamilero le Malchanceux": "champaknyde.png", "Chamoute le Duveteux": "champodonte.png", "Champmé le Méchant": "champmane.png", "Champolyon le Polyglotte": "champ_a_gnons.png", "Champoul l'Illuminé": "champbis.png", "Don Kizoth l'Obstiné": "maitre_zoth.png", "Jiankor le Radoteur": "jiangshi_nobi.png", "Kaskapointhe la Couverte": "kaskargo.png", "Maître Koantik le Théoricien": "maitre_koalak.png", "Onabuémangé la Rassasiée": "onabu_geisha.png", "Poolopo la Traditionnelle": "poolay.png", "Seripoth l'Ennemi": "sergent_zoth.png", "Tambouille le Gastronome": "tambourai.png", "Toutouf le Velu": "bitouf_aerien.png", "Tromplamor le Survivant": "tromperelle.png", "Trooyé l'Oxydé": "troollaraj.png", "Tsucékoi la Colporteuse": "tsukinochi.png", "Bakaglace le Congelé": "bakazako.png", "Kaonucléair l'Instable": "kaonashi.png", "Madgang le Docteur": "madura.png", "Roy le Merlin": "roissingue.png", "Tronquette la Réduite": "rouquette.png", "Tsumani l'Inondeur": "tsume_bozu.png", "Barchwork le Multicolore": "bwork_archer.png", "Fangshui la Dysorthographiée": "fangshu.png", "Crachefouxtre le Surpris": "crachefoux.png"};
 function ocreImgUrl(name){
@@ -2209,6 +2376,18 @@ function buildOcreView(){
   });
 
   var html = '';
+
+  // Perso selector bar
+  var activePerso = ocrePersos.find(function(p){return p.id===ocreActivePersoId;});
+  var persoOpts = '';
+  ocrePersos.forEach(function(p){
+    persoOpts += '<option value="'+p.id+'"'+(p.id===ocreActivePersoId?' selected':'')+'>'+p.name+(p.classe?' ('+p.classe+')':'')+'</option>';
+  });
+  html += '<div class="ocre-perso-bar">'
+    +'<span class="ocre-perso-label">Personnage</span>'
+    +'<select class="ocre-perso-select" onchange="switchOcrePerso(this.value)">'+persoOpts+'</select>'
+    +'<button class="ocre-perso-btn" onclick="showOcrePersoModal()">⚙️ Gérer</button>'
+    +'</div>';
 
   // Toolbar
   // Build step selector options
@@ -2381,12 +2560,18 @@ function deleteNote(id){
   saveNotes(); renderNotes();
 }
 
-var SAVE_KEYS = ['alm_mylist','alm_n','alm_td','alm_ti','alm_tp','alm_rd','alm_notes','alm_ocre'];
+var SAVE_KEYS = ['alm_mylist','alm_n','alm_td','alm_ti','alm_tp','alm_rd','alm_notes','alm_ocre','alm_ocre_persos','alm_ocre_active'];
 var _fsHandle = null, _fsDebounce = null, _fsSaving = false;
 
 function _buildSavePayload(){
   var save = { version: 1, date: new Date().toISOString(), data: {} };
   SAVE_KEYS.forEach(function(k){ var v=localStorage.getItem(k); if(v!==null) save.data[k]=v; });
+  // Save per-perso captures
+  ocrePersos.forEach(function(p){
+    var k = 'alm_ocre_' + p.id;
+    var v = localStorage.getItem(k);
+    if(v!==null) save.data[k] = v;
+  });
   return JSON.stringify(save, null, 2);
 }
 
@@ -2459,7 +2644,7 @@ function importData(event){
       if(!save || !save.data) throw new Error('Format invalide');
       var count = 0;
       Object.keys(save.data).forEach(function(k){
-        if(SAVE_KEYS.indexOf(k) !== -1) {
+        if(SAVE_KEYS.indexOf(k) !== -1 || k.indexOf('alm_ocre_p_') === 0) {
           localStorage.setItem(k, save.data[k]);
           count++;
         }

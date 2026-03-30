@@ -453,6 +453,9 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
 .ocre-step-title .step-prog { color:var(--green); margin-left:.3rem; font-size:.6rem; }
 .ocre-step-toggle { background:var(--surface0); border:none; color:var(--subtext0); padding:.15rem .55rem; border-radius:4px; font-size:.58rem; font-weight:600; cursor:pointer; font-family:'Inter',sans-serif; transition:all .15s; margin-left:auto; }
 .ocre-step-toggle:hover { background:var(--mauve); color:var(--mantle); }
+.ocre-manq-list { display:flex; flex-direction:column; gap:4px; margin-bottom:.5rem; }
+.ocre-manq-row { display:flex; align-items:center; gap:.6rem; background:var(--surface0); border-radius:var(--radius-sm); padding:.5rem .7rem; transition:background .1s; }
+.ocre-manq-row:hover { background:var(--surface1); }
 .ocre-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:6px; }
 .ocre-card { background:var(--surface0); border-radius:var(--radius); padding:.6rem .7rem; display:flex; align-items:center; gap:.55rem; border:1.5px solid transparent; cursor:pointer; transition:all .18s; position:relative; }
 .ocre-card:hover { background:var(--surface1); border-color:var(--surface2); }
@@ -2177,6 +2180,7 @@ var ocreFilter = 'all';    // all | monstre | archimonstre | boss
 var ocreSearch = '';
 var ocreShowAll = true;    // false = masquer capturés
 var ocreStep = 0;          // 0 = toutes les étapes
+var ocreViewMode = 'tracker'; // tracker | manquants
 
 /* ── Multi-perso Ocre ─────────────────────────────── */
 var DOFUS_CLASSES = ['Crâ','Ecaflip','Eliotrope','Eniripsa','Enutrof','Féca','Forgelance','Huppermage','Iop','Osamodas','Ouginak','Pandawa','Roublard','Sacrieur','Sadida','Sram','Steamer','Xélor','Zobal'];
@@ -2395,7 +2399,15 @@ function buildOcreView(){
     +'<span class="ocre-perso-label">Personnage</span>'
     +'<select class="ocre-perso-select" onchange="switchOcrePerso(this.value)">'+persoOpts+'</select>'
     +'<button class="ocre-perso-btn" onclick="showOcrePersoModal()">⚙️ Gérer</button>'
+    +'<button class="ocre-perso-btn" onclick="showOcreManquants()" style="'+(ocreViewMode==='manquants'?'background:var(--mauve);color:var(--mantle);font-weight:600':'')+'">📋 Manquants</button>'
     +'</div>';
+
+  // Si mode manquants, afficher cette vue et retourner
+  if(ocreViewMode === 'manquants'){
+    html += buildOcreManquantsView();
+    el.innerHTML = html;
+    return;
+  }
 
   // Toolbar
   // Build step selector options
@@ -2494,6 +2506,118 @@ function toggleOcreStep(step){
   saveOcre();
   buildOcreView();
   toast(allDone ? '↩️ Étape '+step+' décochée' : '✅ Étape '+step+' complète !');
+}
+
+function showOcreManquants(){
+  ocreViewMode = ocreViewMode === 'manquants' ? 'tracker' : 'manquants';
+  buildOcreView();
+}
+
+function buildOcreManquantsView(){
+  if(!ocreData) return '';
+  var totalPersos = ocrePersos.length;
+  // Charger les captures de tous les persos
+  var allCaptures = {};
+  ocrePersos.forEach(function(p){
+    var capts = getOcrePersoCaptures(p.id);
+    Object.keys(capts).forEach(function(mid){
+      if(!allCaptures[mid]) allCaptures[mid] = [];
+      allCaptures[mid].push(p);
+    });
+  });
+
+  // Grouper par étape
+  var byStep = {};
+  ocreData.forEach(function(m){
+    var step = m.step || 1;
+    if(!byStep[step]) byStep[step] = [];
+    byStep[step].push(m);
+  });
+  var steps = Object.keys(byStep).map(Number).sort(function(a,b){return a-b;});
+
+  // Calculer totaux
+  var totalManquant = 0;
+  ocreData.forEach(function(m){
+    var done = (allCaptures[m.id] || []).length;
+    totalManquant += totalPersos - done;
+  });
+
+  var html = '';
+
+  // Stats globales
+  html += '<div class="ocre-stats" style="grid-template-columns:repeat(3,1fr);margin-bottom:1rem">'
+    +'<div class="ocre-stat"><div class="ocre-stat-v" style="color:var(--red)">'+totalManquant+'</div><div class="ocre-stat-l">Captures manquantes</div></div>'
+    +'<div class="ocre-stat"><div class="ocre-stat-v" style="color:var(--mauve)">'+totalPersos+'</div><div class="ocre-stat-l">Personnages</div></div>'
+    +'<div class="ocre-stat"><div class="ocre-stat-v" style="color:var(--green)">'+(totalPersos * ocreData.length - totalManquant)+'</div><div class="ocre-stat-l">Captures faites</div></div>'
+    +'</div>';
+
+  // Légende persos
+  html += '<div style="display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1rem">';
+  ocrePersos.forEach(function(p,i){
+    var colors = ['var(--mauve)','var(--blue)','var(--peach)','var(--green)','var(--pink)','var(--yellow)','var(--teal)','var(--red)'];
+    var col = colors[i % colors.length];
+    html += '<span style="font-size:.62rem;font-weight:600;padding:2px 8px;border-radius:4px;background:color-mix(in srgb, '+col+' 20%, transparent);color:'+col+'">'+p.name+(p.classe?' ('+p.classe+')':'')+'</span>';
+  });
+  html += '</div>';
+
+  steps.forEach(function(step){
+    var mons = byStep[step] || [];
+    var stepManquant = 0;
+    mons.forEach(function(m){
+      var done = (allCaptures[m.id] || []).length;
+      stepManquant += totalPersos - done;
+    });
+    if(stepManquant === 0) return; // étape complète pour tous
+
+    html += '<div class="ocre-step-title">Étape <span>'+step+'</span>'
+      +'<span class="step-prog" style="color:var(--red)">('+stepManquant+' manquant'+(stepManquant>1?'s':'')+')</span>'
+      +'<span style="flex:1;height:1px;background:var(--surface0)"></span>'
+      +'</div>';
+
+    html += '<div class="ocre-manq-list">';
+    mons.forEach(function(m){
+      var capturedBy = allCaptures[m.id] || [];
+      var missing = totalPersos - capturedBy.length;
+      if(missing === 0) return;
+
+      var name = (typeof m.name === 'string') ? m.name : (m.name && m.name.fr) || '?';
+      var type = (typeof m.type === 'string') ? m.type : (m.type && m.type.name && m.type.name.fr) || '';
+      var img = ocreImgUrl(m.name);
+      var typeBg = type==='archimonstre'?'rgba(203,166,247,.25)':type==='boss'?'rgba(243,139,168,.25)':'rgba(137,180,250,.2)';
+      var typeFg = type==='archimonstre'?'var(--mauve)':type==='boss'?'var(--red)':'var(--blue)';
+      var typeLabel = type==='archimonstre'?'⚡ Archi':type==='boss'?'💀 Boss':'🐾 Monstre';
+
+      // Pastilles par perso
+      var dots = '';
+      var colors = ['var(--mauve)','var(--blue)','var(--peach)','var(--green)','var(--pink)','var(--yellow)','var(--teal)','var(--red)'];
+      ocrePersos.forEach(function(p,i){
+        var col = colors[i % colors.length];
+        var done = capturedBy.some(function(cp){ return cp.id === p.id; });
+        dots += '<span title="'+p.name+(done?' ✓':' ✗')+'" style="display:inline-block;width:10px;height:10px;border-radius:50%;'
+          +(done?'background:'+col+';opacity:1':'background:var(--surface1);opacity:.5;border:1px solid var(--surface2)')
+          +';flex-shrink:0"></span>';
+      });
+
+      html += '<div class="ocre-manq-row">'
+        +'<div class="ocre-card-img" style="width:30px;height:30px">'
+        +'<img src="'+img+'" style="width:26px;height:26px;image-rendering:pixelated" onerror="this.style.display=\'none\'">'
+        +'</div>'
+        +'<div style="flex:1;min-width:0">'
+        +'<div style="font-size:.75rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+name+'</div>'
+        +'<span class="ocre-type-badge" style="background:'+typeBg+';color:'+typeFg+'">'+typeLabel+'</span>'
+        +'</div>'
+        +'<div style="display:flex;gap:3px;align-items:center">'+dots+'</div>'
+        +'<div style="font-size:.78rem;font-weight:700;color:var(--red);min-width:28px;text-align:right">×'+missing+'</div>'
+        +'</div>';
+    });
+    html += '</div>';
+  });
+
+  if(totalManquant === 0){
+    html += '<div style="text-align:center;padding:3rem;color:var(--green);font-size:.9rem;font-weight:600">🎉 Tous les monstres sont capturés sur tous les persos !</div>';
+  }
+
+  return html;
 }
 
 

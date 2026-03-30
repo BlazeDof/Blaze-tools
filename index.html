@@ -448,9 +448,11 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
 .ocre-chip:hover { background:var(--surface1); color:var(--text); }
 .ocre-chip.on { background:var(--mauve); color:var(--mantle); font-weight:600; }
 .ocre-step-title { font-size:.62rem; font-weight:700; letter-spacing:.15em; color:var(--overlay0); text-transform:uppercase; margin:1.2rem 0 .6rem; display:flex; align-items:center; gap:.5rem; }
-.ocre-step-title::after { content:''; flex:1; height:1px; background:var(--surface0); }
+.ocre-step-title::after { content:none; }
 .ocre-step-title span { color:var(--mauve); }
 .ocre-step-title .step-prog { color:var(--green); margin-left:.3rem; font-size:.6rem; }
+.ocre-step-toggle { background:var(--surface0); border:none; color:var(--subtext0); padding:.15rem .55rem; border-radius:4px; font-size:.58rem; font-weight:600; cursor:pointer; font-family:'Inter',sans-serif; transition:all .15s; margin-left:auto; }
+.ocre-step-toggle:hover { background:var(--mauve); color:var(--mantle); }
 .ocre-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:6px; }
 .ocre-card { background:var(--surface0); border-radius:var(--radius); padding:.6rem .7rem; display:flex; align-items:center; gap:.55rem; border:1.5px solid transparent; cursor:pointer; transition:all .18s; position:relative; }
 .ocre-card:hover { background:var(--surface1); border-color:var(--surface2); }
@@ -2436,6 +2438,8 @@ function buildOcreView(){
       html += '<div class="ocre-step-title">Étape <span>'+step+'</span>'
         +'<span class="step-prog">('+stepCapt+'/'+stepAll.length+')</span>'
         +(stepDone?'<span style="color:var(--green);font-size:.65rem">✓ Complète</span>':'')
+        +'<span style="flex:1;height:1px;background:var(--surface0)"></span>'
+        +'<button class="ocre-step-toggle" onclick="event.stopPropagation();toggleOcreStep('+step+')" title="'+(stepDone?'Décocher':'Cocher')+' toute l\'étape">'+(stepDone?'✕ Décocher':'✓ Tout cocher')+'</button>'
         +'</div>';
 
       html += '<div class="ocre-grid">';
@@ -2472,6 +2476,18 @@ function toggleOcreCapture(id){
   else ocreCaptured[id] = true;
   saveOcre();
   buildOcreView();
+}
+function toggleOcreStep(step){
+  if(!ocreData) return;
+  var mons = ocreData.filter(function(m){ return m.step === step; });
+  var allDone = mons.every(function(m){ return !!ocreCaptured[m.id]; });
+  mons.forEach(function(m){
+    if(allDone) delete ocreCaptured[m.id];
+    else ocreCaptured[m.id] = true;
+  });
+  saveOcre();
+  buildOcreView();
+  toast(allDone ? '↩️ Étape '+step+' décochée' : '✅ Étape '+step+' complète !');
 }
 
 

@@ -6,7 +6,7 @@
 <title>Blaze-Tools</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-/* ── Catppuccin Mocha ─────────────────────────────── */
+/* ── Catppuccin Mocha (dark) ───────────────────────── */
 :root {
   --base:   #1e1e2e;
   --mantle: #181825;
@@ -39,6 +39,7 @@
   --radius: 10px;
   --radius-sm: 6px;
 }
+
 
 * { margin:0; padding:0; box-sizing:border-box; }
 body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif; color:var(--text); display:flex; flex-direction:column; }
@@ -472,6 +473,17 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
 .ocre-search:focus { background:var(--surface1); }
 .ocre-search::placeholder { color:var(--overlay0); }
 .ocre-loading { display:flex; align-items:center; justify-content:center; gap:.8rem; padding:4rem; color:var(--overlay0); font-size:.85rem; }
+/* ── Week view ────────────────────────────────────── */
+.week-grid { display:flex; flex-direction:column; gap:6px; }
+.week-day { background:var(--mantle); border-radius:var(--radius); border:1.5px solid var(--surface0); padding:.8rem 1rem; cursor:pointer; transition:all .15s; }
+.week-day:hover { border-color:var(--surface2); background:var(--surface0); }
+.week-day.today { border-color:var(--mauve); background:rgba(203,166,247,.06); }
+.week-day-hdr { display:flex; align-items:center; gap:.5rem; margin-bottom:.5rem; font-size:.72rem; font-weight:600; color:var(--text); }
+.week-day-hdr span { font-weight:400; color:var(--overlay1); font-size:.68rem; }
+.week-today-badge { background:var(--mauve); color:var(--mantle); padding:1px 7px; border-radius:4px; font-size:.55rem; font-weight:700; }
+.week-day-body { padding:0; }
+.week-day-footer { display:flex; justify-content:flex-end; margin-top:.4rem; }
+.week-loading { text-align:center; padding:2rem; color:var(--overlay0); font-size:.82rem; }
 /* ── MOBILE ──────────────────────────────────────── */
 .hamburger { display:none; background:none; border:none; color:var(--text); cursor:pointer; padding:.4rem; flex-direction:column; gap:5px; margin-left:auto; }
 .hamburger span { display:block; width:24px; height:2px; background:var(--text); border-radius:2px; }
@@ -608,6 +620,7 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
       <div class="ndot" id="nDot"></div>
       <span id="nLbl">Rappel</span>
     </button>
+
   </div>
 </header>
 
@@ -626,6 +639,7 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
   <div class="mobile-menu-sep">Données</div>
   <button class="mobile-menu-item" onclick="exportData();toggleMobileMenu()">💾 Export</button>
   <label class="mobile-menu-item" style="cursor:pointer">📂 Import<input type="file" accept=".json" onchange="importData(event);toggleMobileMenu()" style="display:none"></label>
+
 </div>
 
 <button class="panel-toggle" id="panelToggle" onclick="toggleMobilePanel()" title="Détail du jour">ℹ️</button>
@@ -639,6 +653,7 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
       <button class="nbtn" onclick="cm(-1)">&#9664;</button>
       <button class="tbtn" onclick="goToday()">Aujourd'hui</button>
       <button class="nbtn" onclick="cm(1)">&#9654;</button>
+      <button class="tbtn" id="weekToggle" onclick="toggleCalMode()" style="margin-left:4px">Semaine</button>
       <div style="position:relative;width:30px;height:30px;flex-shrink:0;"><input type="date" id="datePicker" onchange="goToDate(this.value)" style="position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;"><button class="nbtn" style="width:30px;height:30px;pointer-events:none;">&#128197;</button></div>
       <div class="swrap">
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -657,6 +672,7 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
     </div>
     <div class="cal-grid" id="cGrid"></div>
   </div>
+  <div id="weekView" style="display:none"><div id="weekContent"></div></div>
 
   <div id="listView">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:.8rem;">
@@ -1145,8 +1161,94 @@ function loadNextML(){
       +'</div>';
   });
 }
-function cm(d){vM+=d;if(vM>11){vM=0;vY++;}if(vM<0){vM=11;vY--;}renderCal();}
-function goToday(){vY=tod.getFullYear();vM=tod.getMonth();renderCal();setTimeout(function(){sel(fmt(tod));},80);}
+var calMode = 'month'; // month | week
+var weekStart = new Date(tod);
+weekStart.setDate(tod.getDate() - ((tod.getDay()+6)%7)); // lundi de cette semaine
+
+function toggleCalMode(){
+  calMode = calMode === 'month' ? 'week' : 'month';
+  var btn = document.getElementById('weekToggle');
+  if(btn) btn.textContent = calMode === 'week' ? 'Mois' : 'Semaine';
+  if(calMode === 'week'){
+    document.getElementById('calView').style.display = 'none';
+    document.getElementById('weekView').style.display = 'block';
+    renderWeek();
+  } else {
+    document.getElementById('calView').style.display = 'block';
+    document.getElementById('weekView').style.display = 'none';
+    renderCal();
+  }
+}
+
+function cm(d){
+  if(calMode === 'week'){
+    weekStart.setDate(weekStart.getDate() + d * 7);
+    renderWeek();
+  } else {
+    vM+=d;if(vM>11){vM=0;vY++;}if(vM<0){vM=11;vY--;}renderCal();
+  }
+}
+
+function goToday(){
+  vY=tod.getFullYear();vM=tod.getMonth();
+  weekStart = new Date(tod);
+  weekStart.setDate(tod.getDate() - ((tod.getDay()+6)%7));
+  if(calMode === 'week') renderWeek();
+  else { renderCal();setTimeout(function(){sel(fmt(tod));},80); }
+}
+
+function renderWeek(){
+  var el = document.getElementById('weekContent');
+  var JOURS = ['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi','Dimanche'];
+  var days = [];
+  for(var i=0;i<7;i++){
+    var d = new Date(weekStart);
+    d.setDate(weekStart.getDate()+i);
+    days.push(d);
+  }
+  // Titre
+  var d0 = days[0], d6 = days[6];
+  document.getElementById('mTitle').innerHTML = fmtDM(d0)+' — '+fmtDM(d6)+' <span>'+d6.getFullYear()+'</span>';
+
+  el.innerHTML = '<div class="week-loading">Chargement...</div>';
+  Promise.all(days.map(function(d){ return fetchDay(fmt(d)).then(function(data){ return {date:d, data:data}; }); }))
+    .then(function(res){
+      var html = '<div class="week-grid">';
+      res.forEach(function(r, i){
+        var d = r.date, data = r.data, ds = fmt(d);
+        var isTod = ds === fmt(tod);
+        var inL = inML(ds);
+        if(!data){ html += '<div class="week-day'+(isTod?' today':'')+'"><div class="week-day-hdr">'+JOURS[i]+'<span>'+d.getDate()+' '+SH[d.getMonth()]+'</span></div><div style="color:var(--overlay0);font-size:.75rem;padding:1rem">Données indisponibles</div></div>'; return; }
+        var nm = (data.bonus&&data.bonus.type&&data.bonus.type.name)||'—';
+        var dc = (data.bonus&&data.bonus.description)||'';
+        var tribute = data.tribute||{}, itm = tribute.item||{}, qty = tribute.quantity||1;
+        var tags = classify(dc, nm), cat = getCat(tags[0]);
+        var img = (itm.image_urls&&itm.image_urls.icon)||'';
+
+        html += '<div class="week-day'+(isTod?' today':'')+'" onclick="sel(\''+ds+'\')">'
+          +'<div class="week-day-hdr">'+JOURS[i]+'<span>'+d.getDate()+' '+SH[d.getMonth()]+'</span>'
+          +(isTod?'<span class="week-today-badge">Aujourd\'hui</span>':'')
+          +'</div>'
+          +'<div class="week-day-body">'
+          +'<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem">'
+          +(img?'<img src="'+img+'" style="width:32px;height:32px;image-rendering:pixelated;border-radius:4px;flex-shrink:0">':'')
+          +'<div style="min-width:0">'
+          +'<div style="font-size:.78rem;font-weight:600;color:var(--text)">'+( itm.name||'—')+'</div>'
+          +'<div style="font-size:.68rem;color:var(--mauve)">× '+qty+'</div>'
+          +'</div>'
+          +'</div>'
+          +'<span style="font-size:.55rem;font-weight:600;padding:2px 6px;border-radius:3px;color:'+cat.fg+';background:'+cat.bg+'">'+cat.label+'</span>'
+          +'<div style="font-size:.7rem;color:var(--subtext0);margin-top:.4rem;line-height:1.4">'+nm+'</div>'
+          +'</div>'
+          +'<div class="week-day-footer">'
+          +'<button class="lfav'+(inL?' on':'')+'" onclick="event.stopPropagation();toggleML(\''+ds+'\')" style="font-size:.7rem" title="Ma liste">&#9733;</button>'
+          +'</div>'
+          +'</div>';
+      });
+      html += '</div>';
+      el.innerHTML = html;
+    });
+}
 function goToDate(ds){
   if(!ds)return;
   var parts=ds.split('-'),d=new Date(parseInt(parts[0]),parseInt(parts[1])-1,parseInt(parts[2]));
@@ -2470,6 +2572,7 @@ function buildOcreView(){
         var typeBg = type==='archimonstre'?'rgba(203,166,247,.25)':type==='boss'?'rgba(243,139,168,.25)':'rgba(137,180,250,.2)';
         var typeFg = type==='archimonstre'?'var(--mauve)':type==='boss'?'var(--red)':'var(--blue)';
         var typeLabel = type==='archimonstre'?'⚡ Archi':type==='boss'?'💀 Boss':'🐾 Monstre';
+        var lvl = m.level_min === m.level_max ? 'Niv. '+m.level_min : 'Niv. '+m.level_min+'-'+m.level_max;
 
         html += '<div class="ocre-card'+(capt?' captured':'')+'" onclick="toggleOcreCapture('+m.id+')">'
           +'<div class="ocre-card-img">'
@@ -2478,7 +2581,10 @@ function buildOcreView(){
           +'</div>'
           +'<div class="ocre-card-info">'
           +'<div class="ocre-name">'+name+'</div>'
+          +'<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">'
           +'<div class="ocre-type-badge" style="background:'+typeBg+';color:'+typeFg+'">'+typeLabel+'</div>'
+          +'<span style="font-size:.5rem;color:var(--overlay1)">'+lvl+'</span>'
+          +'</div>'
           +'</div>'
           +'<div class="ocre-check">'+(capt?'✓':'')+'</div>'
           +'</div>';
@@ -2599,13 +2705,18 @@ function buildOcreManquantsView(){
           +';flex-shrink:0"></span>';
       });
 
+      var lvl = m.level_min === m.level_max ? 'Niv. '+m.level_min : 'Niv. '+m.level_min+'-'+m.level_max;
+
       html += '<div class="ocre-manq-row">'
         +'<div class="ocre-card-img" style="width:30px;height:30px">'
         +'<img src="'+img+'" style="width:26px;height:26px;image-rendering:pixelated" onerror="this.style.display=\'none\'">'
         +'</div>'
         +'<div style="flex:1;min-width:0">'
         +'<div style="font-size:.75rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+name+'</div>'
+        +'<div style="display:flex;align-items:center;gap:4px">'
         +'<span class="ocre-type-badge" style="background:'+typeBg+';color:'+typeFg+'">'+typeLabel+'</span>'
+        +'<span style="font-size:.5rem;color:var(--overlay1)">'+lvl+'</span>'
+        +'</div>'
         +'</div>'
         +'<div style="display:flex;gap:3px;align-items:center">'+dots+'</div>'
         +'<div style="font-size:.78rem;font-weight:700;color:var(--red);min-width:28px;text-align:right">×'+missing+'</div>'

@@ -2432,11 +2432,45 @@ function ocreImgUrl(name){
 function ocreImgErr(el){ el.style.display='none'; if(el.nextSibling) el.nextSibling.style.display='inline'; }
 
 function getStoneSize(lvl){
-  if(lvl <= 50) return {name:'Petite', color:'var(--green)', bg:'rgba(166,227,161,.15)', img:'https://api.dofusdb.fr/img/items/9686.png'};
-  if(lvl <= 100) return {name:'Moyenne', color:'var(--blue)', bg:'rgba(137,180,250,.15)', img:'https://api.dofusdb.fr/img/items/9687.png'};
-  if(lvl <= 150) return {name:'Grande', color:'var(--yellow)', bg:'rgba(249,226,175,.15)', img:'https://api.dofusdb.fr/img/items/9688.png'};
-  if(lvl <= 200) return {name:'Énorme', color:'var(--peach)', bg:'rgba(250,179,135,.15)', img:'https://api.dofusdb.fr/img/items/9689.png'};
-  return {name:'Gigantesque', color:'var(--red)', bg:'rgba(243,139,168,.15)', img:'https://api.dofusdb.fr/img/items/9690.png'};
+  if(lvl <= 50) return {name:'Petite', color:'var(--green)', bg:'rgba(166,227,161,.15)', rank:0};
+  if(lvl <= 100) return {name:'Moyenne', color:'var(--blue)', bg:'rgba(137,180,250,.15)', rank:1};
+  if(lvl <= 150) return {name:'Grande', color:'var(--yellow)', bg:'rgba(249,226,175,.15)', rank:2};
+  if(lvl <= 200) return {name:'Énorme', color:'var(--peach)', bg:'rgba(250,179,135,.15)', rank:3};
+  return {name:'Gigantesque', color:'var(--red)', bg:'rgba(243,139,168,.15)', rank:4};
+}
+
+var STONE_SIZES = [
+  {name:'Petite', maxLvl:50, color:'var(--green)', bg:'rgba(166,227,161,.15)'},
+  {name:'Moyenne', maxLvl:100, color:'var(--blue)', bg:'rgba(137,180,250,.15)'},
+  {name:'Grande', maxLvl:150, color:'var(--yellow)', bg:'rgba(249,226,175,.15)'},
+  {name:'Énorme', maxLvl:200, color:'var(--peach)', bg:'rgba(250,179,135,.15)'},
+  {name:'Gigantesque', maxLvl:9999, color:'var(--red)', bg:'rgba(243,139,168,.15)'}
+];
+
+var stonePrices = {};
+try { stonePrices = JSON.parse(localStorage.getItem('alm_ocre_stone_prices') || '{}'); } catch(e){}
+function saveStonePrices(){ try { localStorage.setItem('alm_ocre_stone_prices', JSON.stringify(stonePrices)); } catch(e){} triggerAutoSave(); }
+
+function getBestStone(lvl){
+  var minRank = getStoneSize(lvl).rank;
+  var best = null;
+  var bestPrice = Infinity;
+  for(var i = minRank; i < STONE_SIZES.length; i++){
+    var s = STONE_SIZES[i];
+    var price = stonePrices[s.name];
+    if(price !== undefined && price !== null && price !== '' && Number(price) >= 0){
+      if(Number(price) < bestPrice){
+        bestPrice = Number(price);
+        best = s;
+      }
+    }
+  }
+  if(!best) return STONE_SIZES[minRank];
+  return best;
+}
+
+function hasStonePrices(){
+  return Object.keys(stonePrices).some(function(k){ return stonePrices[k] !== undefined && stonePrices[k] !== '' && Number(stonePrices[k]) > 0; });
 }
 
 
@@ -2511,11 +2545,19 @@ function buildOcreView(){
     +'<select class="ocre-perso-select" onchange="switchOcrePerso(this.value)">'+persoOpts+'</select>'
     +'<button class="ocre-perso-btn" onclick="showOcrePersoModal()">⚙️ Gérer</button>'
     +'<button class="ocre-perso-btn" onclick="showOcreManquants()" style="'+(ocreViewMode==='manquants'?'background:var(--mauve);color:var(--mantle);font-weight:600':'')+'">📋 Manquants</button>'
+    +'<button class="ocre-perso-btn" onclick="showOcrePierres()" style="'+(ocreViewMode==='pierres'?'background:var(--mauve);color:var(--mantle);font-weight:600':'')+'">💰 Pierres</button>'
     +'</div>';
 
   // Si mode manquants, afficher cette vue et retourner
   if(ocreViewMode === 'manquants'){
     html += buildOcreManquantsView();
+    el.innerHTML = html;
+    return;
+  }
+
+  // Si mode pierres, afficher cette vue et retourner
+  if(ocreViewMode === 'pierres'){
+    html += buildOcrePierresView();
     el.innerHTML = html;
     return;
   }
@@ -2565,7 +2607,7 @@ function buildOcreView(){
   var stoneHtml = '';
   stoneKeys.forEach(function(k){
     if(stoneCount[k] && stoneCount[k].count > 0){
-      stoneHtml += '<span style="font-size:.62rem;font-weight:600;padding:3px 8px;border-radius:4px;background:'+stoneCount[k].bg+';color:'+stoneCount[k].color+'"><img src="'+stoneCount[k].img+'" style="width:14px;height:14px;vertical-align:middle;image-rendering:pixelated;margin-right:3px">'+k+' ×'+stoneCount[k].count+'</span>';
+      stoneHtml += '<span style="font-size:.62rem;font-weight:600;padding:3px 8px;border-radius:4px;background:'+stoneCount[k].bg+';color:'+stoneCount[k].color+'"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:'+stoneCount[k].color+';vertical-align:middle;margin-right:4px;opacity:.7"></span>'+k+' ×'+stoneCount[k].count+'</span>';
     }
   });
   if(stoneHtml){
@@ -2617,7 +2659,7 @@ function buildOcreView(){
           +'<div class="ocre-type-badge" style="background:'+typeBg+';color:'+typeFg+'">'+typeLabel+'</div>'
           +'<span style="font-size:.5rem;color:var(--overlay1)">'+lvl+'</span>'
           +'</div>'
-          +'<div style="font-size:.48rem;color:'+stone.color+';margin-top:1px"><img src="'+stone.img+'" style="width:12px;height:12px;vertical-align:middle;image-rendering:pixelated;margin-right:2px">'+stone.name+'</div>'
+          +'<div style="font-size:.48rem;color:'+stone.color+';margin-top:1px"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:'+stone.color+';vertical-align:middle;margin-right:3px;opacity:.7"></span>'+stone.name+'</div>'
           +'</div>'
           +'<div class="ocre-check">'+(capt?'✓':'')+'</div>'
           +'</div>';
@@ -2651,6 +2693,166 @@ function toggleOcreStep(step){
 function showOcreManquants(){
   ocreViewMode = ocreViewMode === 'manquants' ? 'tracker' : 'manquants';
   buildOcreView();
+}
+
+function showOcrePierres(){
+  ocreViewMode = ocreViewMode === 'pierres' ? 'tracker' : 'pierres';
+  buildOcreView();
+}
+
+function buildOcrePierresView(){
+  if(!ocreData) return '';
+  var html = '';
+
+  // Formulaire prix
+  html += '<div style="background:var(--mantle);border-radius:var(--radius);border:1.5px solid var(--surface0);padding:1rem 1.2rem;margin-bottom:1rem">'
+    +'<div style="font-size:.62rem;font-weight:700;letter-spacing:.12em;color:var(--overlay0);text-transform:uppercase;margin-bottom:.8rem">Prix des pierres d\'âme (kamas)</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px">';
+  STONE_SIZES.forEach(function(s){
+    var val = stonePrices[s.name] || '';
+    html += '<div style="display:flex;flex-direction:column;gap:3px">'
+      +'<label style="font-size:.62rem;font-weight:600;color:'+s.color+';display:flex;align-items:center;gap:4px">'
+      +'<span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:'+s.color+';opacity:.7"></span>'
+      +s.name+' (≤'+s.maxLvl+')'
+      +'</label>'
+      +'<input type="text" inputmode="numeric" placeholder="Prix..." value="'+(val?fmtTei(val):'')+'" '
+      +'oninput="stonePrices[\''+s.name+'\']=parseTei(this.value)||0;this.value=fmtTei(parseTei(this.value))||this.value;saveStonePrices();updatePierresCalc()" '
+      +'style="background:var(--surface0);border:1.5px solid var(--surface1);color:var(--text);padding:.35rem .6rem;border-radius:var(--radius-sm);font-size:.75rem;font-family:Inter,sans-serif;outline:none;width:100%">'
+      +'</div>';
+  });
+  html += '</div></div>';
+
+  // Calcul optimisé
+  html += '<div id="pierresCalcResult"></div>';
+
+  // Script inline pour recalcul
+  html += '<script>updatePierresCalc();<\/script>';
+
+  return html;
+}
+
+function updatePierresCalc(){
+  var el = document.getElementById('pierresCalcResult');
+  if(!el || !ocreData) return;
+
+  var hasP = hasStonePrices();
+
+  // Compter les monstres manquants par taille minimum requise
+  var needBySize = {};
+  STONE_SIZES.forEach(function(s){ needBySize[s.name] = 0; });
+  var totalMissing = 0;
+  ocreData.forEach(function(m){
+    if(!ocreCaptured[m.id]){
+      var s = getStoneSize(m.level_max);
+      needBySize[s.name]++;
+      totalMissing++;
+    }
+  });
+
+  if(totalMissing === 0){
+    el.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--green);font-size:.85rem;font-weight:600">🎉 Tous les monstres sont capturés !</div>';
+    return;
+  }
+
+  var html = '';
+
+  if(!hasP){
+    // Pas de prix renseignés — afficher juste le résumé basique
+    html += '<div style="background:var(--surface0);border-radius:var(--radius-sm);padding:.8rem 1rem;margin-bottom:1rem;font-size:.72rem;color:var(--subtext0)">'
+      +'Renseigne les prix ci-dessus pour voir la stratégie optimale.</div>';
+
+    html += '<div style="font-size:.62rem;font-weight:700;letter-spacing:.12em;color:var(--overlay0);text-transform:uppercase;margin-bottom:.6rem">Pierres minimum requises</div>';
+    html += '<div style="display:flex;flex-direction:column;gap:4px;margin-bottom:1rem">';
+    STONE_SIZES.forEach(function(s){
+      if(needBySize[s.name] > 0){
+        html += '<div style="display:flex;align-items:center;gap:.5rem;background:var(--surface0);border-radius:var(--radius-sm);padding:.5rem .7rem">'
+          +'<span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:'+s.color+';opacity:.7"></span>'
+          +'<span style="font-size:.75rem;font-weight:600;color:'+s.color+';flex:1">'+s.name+'</span>'
+          +'<span style="font-size:.82rem;font-weight:700;color:var(--text)">×'+needBySize[s.name]+'</span>'
+          +'</div>';
+      }
+    });
+    html += '</div>';
+  } else {
+    // Calculer stratégie minimum
+    var costMin = 0;
+    var buyMin = {};
+    STONE_SIZES.forEach(function(s){ buyMin[s.name] = 0; });
+    ocreData.forEach(function(m){
+      if(!ocreCaptured[m.id]){
+        var s = getStoneSize(m.level_max);
+        var price = Number(stonePrices[s.name]) || 0;
+        buyMin[s.name]++;
+        costMin += price;
+      }
+    });
+
+    // Calculer stratégie optimale (pour chaque monstre, prendre la pierre la moins chère qui couvre son niveau)
+    var costOpti = 0;
+    var buyOpti = {};
+    STONE_SIZES.forEach(function(s){ buyOpti[s.name] = 0; });
+    ocreData.forEach(function(m){
+      if(!ocreCaptured[m.id]){
+        var best = getBestStone(m.level_max);
+        var price = Number(stonePrices[best.name]) || 0;
+        buyOpti[best.name]++;
+        costOpti += price;
+      }
+    });
+
+    var savings = costMin - costOpti;
+
+    // Affichage comparaison
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem">';
+
+    // Colonne stratégie minimum
+    html += '<div style="background:var(--surface0);border-radius:var(--radius);padding:.8rem 1rem">'
+      +'<div style="font-size:.58rem;font-weight:700;letter-spacing:.1em;color:var(--overlay0);text-transform:uppercase;margin-bottom:.5rem">Pierres minimum</div>';
+    STONE_SIZES.forEach(function(s){
+      if(buyMin[s.name] > 0){
+        var p = Number(stonePrices[s.name]) || 0;
+        html += '<div style="display:flex;align-items:center;gap:4px;margin-bottom:3px">'
+          +'<span style="display:inline-block;width:6px;height:6px;border-radius:2px;background:'+s.color+'"></span>'
+          +'<span style="font-size:.65rem;color:'+s.color+';flex:1">'+s.name+' ×'+buyMin[s.name]+'</span>'
+          +'<span style="font-size:.6rem;color:var(--overlay1)">'+fmtK(p*buyMin[s.name])+'k</span>'
+          +'</div>';
+      }
+    });
+    html += '<div style="border-top:1px solid var(--surface1);margin-top:.5rem;padding-top:.5rem;font-size:.82rem;font-weight:700;color:var(--text)">'+fmtK(costMin/1000)+' kk</div>'
+      +'</div>';
+
+    // Colonne stratégie optimale
+    html += '<div style="background:var(--mantle);border-radius:var(--radius);padding:.8rem 1rem;border:1.5px solid var(--mauve)">'
+      +'<div style="font-size:.58rem;font-weight:700;letter-spacing:.1em;color:var(--mauve);text-transform:uppercase;margin-bottom:.5rem">Stratégie optimale ✨</div>';
+    STONE_SIZES.forEach(function(s){
+      if(buyOpti[s.name] > 0){
+        var p = Number(stonePrices[s.name]) || 0;
+        var isUpgrade = buyOpti[s.name] > needBySize[s.name];
+        html += '<div style="display:flex;align-items:center;gap:4px;margin-bottom:3px">'
+          +'<span style="display:inline-block;width:6px;height:6px;border-radius:2px;background:'+s.color+'"></span>'
+          +'<span style="font-size:.65rem;color:'+s.color+';flex:1">'+s.name+' ×'+buyOpti[s.name]+(isUpgrade?' ↑':'')+'</span>'
+          +'<span style="font-size:.6rem;color:var(--overlay1)">'+fmtK(p*buyOpti[s.name])+'k</span>'
+          +'</div>';
+      }
+    });
+    html += '<div style="border-top:1px solid var(--surface1);margin-top:.5rem;padding-top:.5rem;font-size:.82rem;font-weight:700;color:var(--mauve)">'+fmtK(costOpti/1000)+' kk</div>'
+      +'</div>';
+
+    html += '</div>';
+
+    // Économie
+    if(savings > 0){
+      html += '<div style="background:rgba(166,227,161,.1);border-radius:var(--radius-sm);padding:.6rem 1rem;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem">'
+        +'<span style="font-size:.82rem">💰</span>'
+        +'<span style="font-size:.75rem;font-weight:600;color:var(--green)">Économie : '+fmtK(savings/1000)+' kk en prenant des pierres plus grandes !</span>'
+        +'</div>';
+    } else if(savings === 0){
+      html += '<div style="background:var(--surface0);border-radius:var(--radius-sm);padding:.6rem 1rem;margin-bottom:1rem;font-size:.72rem;color:var(--subtext0)">'
+        +'Les pierres minimum sont déjà l\'option la moins chère.</div>';
+    }
+  }
+
+  el.innerHTML = html;
 }
 
 function buildOcreManquantsView(){
@@ -2750,7 +2952,7 @@ function buildOcreManquantsView(){
         +'<div style="display:flex;align-items:center;gap:4px">'
         +'<span class="ocre-type-badge" style="background:'+typeBg+';color:'+typeFg+'">'+typeLabel+'</span>'
         +'<span style="font-size:.5rem;color:var(--overlay1)">'+lvl+'</span>'
-        +'<span style="font-size:.48rem;color:'+stone.color+'"><img src="'+stone.img+'" style="width:12px;height:12px;vertical-align:middle;image-rendering:pixelated;margin-right:2px">'+stone.name+'</span>'
+        +'<span style="font-size:.48rem;color:'+stone.color+'"><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:'+stone.color+';vertical-align:middle;margin-right:3px;opacity:.7"></span>'+stone.name+'</span>'
         +'</div>'
         +'</div>'
         +'<div style="display:flex;gap:3px;align-items:center">'+dots+'</div>'
@@ -2853,7 +3055,7 @@ function deleteNote(id){
   saveNotes(); renderNotes();
 }
 
-var SAVE_KEYS = ['alm_mylist','alm_n','alm_td','alm_ti','alm_tp','alm_rd','alm_notes','alm_ocre','alm_ocre_persos','alm_ocre_active'];
+var SAVE_KEYS = ['alm_mylist','alm_n','alm_td','alm_ti','alm_tp','alm_rd','alm_notes','alm_ocre','alm_ocre_persos','alm_ocre_active','alm_ocre_stone_prices'];
 var _fsHandle = null, _fsDebounce = null, _fsSaving = false;
 
 function _buildSavePayload(){

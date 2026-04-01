@@ -616,6 +616,7 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
     <label class="nbtn-hdr" title="Restaurer depuis une sauvegarde" style="cursor:pointer;">
       📂 Import<input type="file" accept=".json" onchange="importData(event)" style="display:none;">
     </label>
+    <button class="nbtn-hdr" onclick="showSyncModal()" title="Synchroniser via GitHub Gist">☁️ Sync</button>
     <button class="nbtn-hdr" id="nBtn" onclick="toggleNotif()">
       <div class="ndot" id="nDot"></div>
       <span id="nLbl">Rappel</span>
@@ -639,6 +640,7 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
   <div class="mobile-menu-sep">Données</div>
   <button class="mobile-menu-item" onclick="exportData();toggleMobileMenu()">💾 Export</button>
   <label class="mobile-menu-item" style="cursor:pointer">📂 Import<input type="file" accept=".json" onchange="importData(event);toggleMobileMenu()" style="display:none"></label>
+  <button class="mobile-menu-item" onclick="showSyncModal();toggleMobileMenu()">☁️ Sync GitHub</button>
 
 </div>
 
@@ -3153,6 +3155,144 @@ function importData(event){
 }
 
 try{if(localStorage.getItem('alm_n')){notif=true;updateNBtn();}}catch(e){}
+/* ── GitHub Gist Sync ─────────────────────────────── */
+var gistToken = '';
+var gistId = '';
+try { gistToken = localStorage.getItem('alm_gist_token') || ''; } catch(e){}
+try { gistId = localStorage.getItem('alm_gist_id') || ''; } catch(e){}
+
+function saveGistConfig(){
+  try { localStorage.setItem('alm_gist_token', gistToken); } catch(e){}
+  try { localStorage.setItem('alm_gist_id', gistId); } catch(e){}
+}
+
+function _getAllSaveData(){
+  var save = { version: 1, date: new Date().toISOString(), data: {} };
+  SAVE_KEYS.forEach(function(k){ var v=localStorage.getItem(k); if(v!==null) save.data[k]=v; });
+  ocrePersos.forEach(function(p){
+    var k = 'alm_ocre_' + p.id;
+    var v = localStorage.getItem(k);
+    if(v!==null) save.data[k] = v;
+  });
+  return save;
+}
+
+function gistPush(){
+  if(!gistToken){ toast('❌ Token non configuré'); return; }
+  var payload = JSON.stringify(_getAllSaveData(), null, 2);
+  var body = { description: 'Blaze-Tools save', public: false, files: { 'blaze-tools-save.json': { content: payload } } };
+
+  var url, method;
+  if(gistId){
+    url = 'https://api.github.com/gists/' + gistId;
+    method = 'PATCH';
+  } else {
+    url = 'https://api.github.com/gists';
+    method = 'POST';
+  }
+
+  toast('☁️ Envoi en cours...');
+  fetch(url, {
+    method: method,
+    headers: { 'Authorization': 'Bearer ' + gistToken, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  }).then(function(r){
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  }).then(function(data){
+    if(!gistId && data.id){
+      gistId = data.id;
+      saveGistConfig();
+      var el = document.getElementById('gistIdDisplay');
+      if(el) el.textContent = gistId;
+    }
+    toast('✅ Données envoyées !');
+    var el = document.getElementById('syncLastDate');
+    if(el) el.textContent = 'Dernière sync : ' + new Date().toLocaleString('fr-FR');
+  }).catch(function(e){
+    toast('❌ Erreur push : ' + e.message);
+  });
+}
+
+function gistPull(){
+  if(!gistToken){ toast('❌ Token non configuré'); return; }
+  if(!gistId){ toast('❌ Aucun Gist lié — fais d\'abord un push'); return; }
+
+  toast('☁️ Récupération...');
+  fetch('https://api.github.com/gists/' + gistId, {
+    headers: { 'Authorization': 'Bearer ' + gistToken }
+  }).then(function(r){
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  }).then(function(data){
+    var file = data.files && data.files['blaze-tools-save.json'];
+    if(!file || !file.content) throw new Error('Fichier non trouvé dans le Gist');
+    var save = JSON.parse(file.content);
+    if(!save || !save.data) throw new Error('Format invalide');
+    var count = 0;
+    Object.keys(save.data).forEach(function(k){
+      if(SAVE_KEYS.indexOf(k) !== -1 || k.indexOf('alm_ocre_p_') === 0){
+        localStorage.setItem(k, save.data[k]);
+        count++;
+      }
+    });
+    toast('✅ ' + count + ' entrées restaurées — rechargement...');
+    setTimeout(function(){ location.reload(); }, 1200);
+  }).catch(function(e){
+    toast('❌ Erreur pull : ' + e.message);
+  });
+}
+
+function showSyncModal(){
+  var overlay = document.createElement('div');
+  overlay.className = 'ocre-modal-overlay';
+  overlay.id = 'syncModal';
+  overlay.onclick = function(e){ if(e.target===overlay) overlay.remove(); };
+
+  var tokenMasked = gistToken ? '••••••••' + gistToken.slice(-4) : '';
+
+  overlay.innerHTML = '<div class="ocre-modal">'
+    +'<div class="ocre-modal-title">☁️ Synchronisation GitHub <button class="ocre-modal-close" onclick="document.getElementById(\'syncModal\').remove()">✕</button></div>'
+
+    +'<div style="font-size:.72rem;color:var(--subtext0);line-height:1.5;margin-bottom:1rem">'
+    +'Synchronise tes données via un <strong style="color:var(--text)">GitHub Gist privé</strong>. '
+    +'Ça te permet de retrouver tes données sur n\'importe quel appareil.'
+    +'</div>'
+
+    +'<div style="margin-bottom:.8rem">'
+    +'<label style="font-size:.62rem;font-weight:700;color:var(--overlay0);text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:.3rem">Token GitHub</label>'
+    +'<div style="display:flex;gap:6px">'
+    +'<input id="gistTokenInput" type="password" placeholder="ghp_xxxxxxxxxxxx" value="'+gistToken+'" '
+    +'style="flex:1;background:var(--surface0);border:1.5px solid var(--surface1);color:var(--text);padding:.4rem .6rem;border-radius:var(--radius-sm);font-size:.75rem;font-family:Inter,sans-serif;outline:none">'
+    +'<button onclick="gistToken=document.getElementById(\'gistTokenInput\').value.trim();saveGistConfig();toast(\'✅ Token sauvegardé\')" '
+    +'style="background:var(--surface0);border:none;color:var(--subtext0);padding:.4rem .8rem;border-radius:var(--radius-sm);font-size:.72rem;cursor:pointer;font-family:Inter,sans-serif;white-space:nowrap">Sauver</button>'
+    +'</div>'
+    +'<div style="font-size:.58rem;color:var(--overlay0);margin-top:.3rem">Crée un token sur <a href="https://github.com/settings/tokens/new" target="_blank" style="color:var(--blue)">github.com/settings/tokens</a> avec le scope <strong>gist</strong> uniquement.</div>'
+    +'</div>'
+
+    +'<div style="margin-bottom:1rem">'
+    +'<label style="font-size:.62rem;font-weight:700;color:var(--overlay0);text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:.3rem">Gist ID <span style="font-weight:400;text-transform:none">(auto après 1er push)</span></label>'
+    +'<div style="display:flex;gap:6px">'
+    +'<input id="gistIdInput" type="text" placeholder="Créé automatiquement..." value="'+gistId+'" '
+    +'style="flex:1;background:var(--surface0);border:1.5px solid var(--surface1);color:var(--text);padding:.4rem .6rem;border-radius:var(--radius-sm);font-size:.75rem;font-family:Inter,sans-serif;outline:none">'
+    +'<button onclick="gistId=document.getElementById(\'gistIdInput\').value.trim();saveGistConfig();toast(\'✅ Gist ID sauvegardé\')" '
+    +'style="background:var(--surface0);border:none;color:var(--subtext0);padding:.4rem .8rem;border-radius:var(--radius-sm);font-size:.72rem;cursor:pointer;font-family:Inter,sans-serif;white-space:nowrap">Sauver</button>'
+    +'</div>'
+    +'<div style="font-size:.58rem;color:var(--overlay0);margin-top:.3rem">Si tu as déjà un Gist sur un autre appareil, colle son ID ici pour récupérer les données.</div>'
+    +'</div>'
+
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:.8rem">'
+    +'<button onclick="gistPush()" style="background:var(--mauve);border:none;color:var(--mantle);padding:.55rem;border-radius:var(--radius-sm);font-size:.78rem;font-weight:600;cursor:pointer;font-family:Inter,sans-serif">⬆️ Push (envoyer)</button>'
+    +'<button onclick="gistPull()" style="background:var(--surface0);border:1.5px solid var(--mauve);color:var(--mauve);padding:.55rem;border-radius:var(--radius-sm);font-size:.78rem;font-weight:600;cursor:pointer;font-family:Inter,sans-serif">⬇️ Pull (récupérer)</button>'
+    +'</div>'
+
+    +'<div id="syncLastDate" style="font-size:.6rem;color:var(--overlay0);text-align:center"></div>'
+
+    +'</div>';
+
+  document.body.appendChild(overlay);
+}
+
 buildFBar(); updateMLCount();
 // Init calendar in background but show dashboard
 renderCal();

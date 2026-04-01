@@ -3372,6 +3372,7 @@ setTimeout(function(){sel(fmt(tod));loadHistory();loadNextML();},60);
 setView('dash');
 // Auto-sync pull on load
 setTimeout(autoSyncPull, 500);
+setInterval(autoSyncPull, 30000);
 fetchDay(fmt(tod)).then(function(data){
   if(!data) return;
   var nm=(data.bonus&&data.bonus.type&&data.bonus.type.name)||'';

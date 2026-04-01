@@ -3253,23 +3253,32 @@ var _gistSyncing = false;
 function triggerAutoSync(){
   if(!gistToken || !gistId) return;
   clearTimeout(_gistSyncDebounce);
-  _gistSyncDebounce = setTimeout(function(){
-    if(_gistSyncing) return;
-    _gistSyncing = true;
-    var payload = JSON.stringify(_getAllSaveData(), null, 2);
-    fetch('https://api.github.com/gists/' + gistId, {
-      method: 'PATCH',
-      headers: { 'Authorization': 'Bearer ' + gistToken, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ files: { 'blaze-tools-save.json': { content: payload } } })
-    }).then(function(r){
-      if(!r.ok) throw new Error('HTTP ' + r.status);
-      try { localStorage.setItem('alm_gist_last_sync', String(Date.now())); } catch(e){}
-      _setSaveStatus('ok');
-    }).catch(function(e){
-      console.warn('Auto-sync push failed:', e.message);
-    }).finally(function(){ _gistSyncing = false; });
-  }, 3000);
+  _gistSyncDebounce = setTimeout(_doGistPush, 1500);
 }
+
+function _doGistPush(){
+  if(!gistToken || !gistId || _gistSyncing) return;
+  _gistSyncing = true;
+  var payload = JSON.stringify(_getAllSaveData(), null, 2);
+  fetch('https://api.github.com/gists/' + gistId, {
+    method: 'PATCH',
+    headers: { 'Authorization': 'Bearer ' + gistToken, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ files: { 'blaze-tools-save.json': { content: payload } } })
+  }).then(function(r){
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    try { localStorage.setItem('alm_gist_last_sync', String(Date.now())); } catch(e){}
+    _setSaveStatus('ok');
+  }).catch(function(e){
+    console.warn('Auto-sync push failed:', e.message);
+  }).finally(function(){ _gistSyncing = false; });
+}
+
+// Push quand on quitte la page
+window.addEventListener('beforeunload', function(){
+  if(!gistToken || !gistId) return;
+  var payload = JSON.stringify(_getAllSaveData(), null, 2);
+  navigator.sendBeacon('https://api.github.com/gists/' + gistId, new Blob([JSON.stringify({ files: { 'blaze-tools-save.json': { content: payload } } })], {type:'application/json'}));
+});
 
 function autoSyncPull(){
   if(!gistToken || !gistId) return;

@@ -3107,9 +3107,11 @@ async function _writeToFile(){
 }
 
 function triggerAutoSave(){
-  if(!_fsHandle) return;
-  clearTimeout(_fsDebounce);
-  _fsDebounce = setTimeout(_writeToFile, 600);
+  if(_fsHandle){
+    clearTimeout(_fsDebounce);
+    _fsDebounce = setTimeout(_writeToFile, 600);
+  }
+  triggerAutoSync();
 }
 
 function exportData(){
@@ -3243,6 +3245,65 @@ function gistPull(){
   });
 }
 
+/* ── Auto-sync ────────────────────────────────────── */
+var _gistSyncDebounce = null;
+var _gistSyncing = false;
+
+function triggerAutoSync(){
+  if(!gistToken || !gistId) return;
+  clearTimeout(_gistSyncDebounce);
+  _gistSyncDebounce = setTimeout(function(){
+    if(_gistSyncing) return;
+    _gistSyncing = true;
+    var payload = JSON.stringify(_getAllSaveData(), null, 2);
+    fetch('https://api.github.com/gists/' + gistId, {
+      method: 'PATCH',
+      headers: { 'Authorization': 'Bearer ' + gistToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ files: { 'blaze-tools-save.json': { content: payload } } })
+    }).then(function(r){
+      if(!r.ok) throw new Error('HTTP ' + r.status);
+      _setSaveStatus('ok');
+    }).catch(function(e){
+      console.warn('Auto-sync push failed:', e.message);
+    }).finally(function(){ _gistSyncing = false; });
+  }, 3000);
+}
+
+function autoSyncPull(){
+  if(!gistToken || !gistId) return;
+  fetch('https://api.github.com/gists/' + gistId, {
+    headers: { 'Authorization': 'Bearer ' + gistToken }
+  }).then(function(r){
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  }).then(function(data){
+    var file = data.files && data.files['blaze-tools-save.json'];
+    if(!file || !file.content) return;
+    var save = JSON.parse(file.content);
+    if(!save || !save.data || !save.date) return;
+    // Comparer les dates
+    var remoteDate = new Date(save.date).getTime();
+    var localSave = _getAllSaveData();
+    var localDate = new Date(localSave.date).getTime();
+    if(remoteDate > localDate + 5000){
+      // Remote est plus récent — importer silencieusement
+      var count = 0;
+      Object.keys(save.data).forEach(function(k){
+        if(SAVE_KEYS.indexOf(k) !== -1 || k.indexOf('alm_ocre_p_') === 0){
+          localStorage.setItem(k, save.data[k]);
+          count++;
+        }
+      });
+      if(count > 0){
+        console.log('Auto-sync: pulled ' + count + ' entries from Gist (remote was newer)');
+        location.reload();
+      }
+    }
+  }).catch(function(e){
+    console.warn('Auto-sync pull failed:', e.message);
+  });
+}
+
 function showSyncModal(){
   var overlay = document.createElement('div');
   overlay.className = 'ocre-modal-overlay';
@@ -3299,6 +3360,8 @@ renderCal();
 setTimeout(function(){sel(fmt(tod));loadHistory();loadNextML();},60);
 // Show dashboard on load
 setView('dash');
+// Auto-sync pull on load
+setTimeout(autoSyncPull, 500);
 fetchDay(fmt(tod)).then(function(data){
   if(!data) return;
   var nm=(data.bonus&&data.bonus.type&&data.bonus.type.name)||'';

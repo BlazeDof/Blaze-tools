@@ -3224,11 +3224,16 @@ function fetchCraftRecipe(ankId, category){
       if(!r.ok) throw new Error('not found');
       return r.json();
     }).then(function(data){
+      console.log('Craft API response:', JSON.stringify(data && data.recipe ? data.recipe[0] : data).substring(0,500));
       if(data && data.recipe && data.recipe.length > 0){
         craftData.resources = data.recipe.map(function(ing){
           var itemData = ing.item || {};
-          var name = (typeof itemData.name === 'string') ? itemData.name : (itemData.name && itemData.name.fr) || '';
-          var img = (itemData.image_urls && itemData.image_urls.icon) || '';
+          var rawName = itemData.name;
+          var name = '';
+          if(typeof rawName === 'string') name = rawName;
+          else if(rawName && typeof rawName === 'object') name = rawName.fr || rawName.en || Object.values(rawName)[0] || '';
+          var imgUrls = itemData.image_urls || {};
+          var img = imgUrls.icon || imgUrls.sd || '';
           return { name: name, qty: ing.quantity || 1, price: 0, img: img };
         });
         renderCrafteur();

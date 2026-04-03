@@ -3031,8 +3031,8 @@ function renderCrafteur(){
   // Ressources nécessaires
   html += '<div style="background:var(--mantle);border-radius:var(--radius);border:1.5px solid var(--surface0);padding:1rem 1.2rem;margin-bottom:.8rem">'
     +'<div style="font-size:.62rem;font-weight:700;letter-spacing:.12em;color:var(--red);text-transform:uppercase;margin-bottom:.6rem">▸ Ressources nécessaires</div>'
-    +'<div style="display:grid;grid-template-columns:1fr 50px 90px 70px 24px;gap:4px;margin-bottom:4px;font-size:.55rem;color:var(--overlay0);font-weight:600;text-transform:uppercase;letter-spacing:.08em;padding:0 2px">'
-    +'<div>Ressource</div><div>Qté</div><div>Prix unit. (k)</div><div>Sous-total</div><div></div>'
+    +'<div style="display:grid;grid-template-columns:24px 1fr 50px 90px 70px 24px;gap:4px;margin-bottom:4px;font-size:.55rem;color:var(--overlay0);font-weight:600;text-transform:uppercase;letter-spacing:.08em;padding:0 2px">'
+    +'<div></div><div>Ressource</div><div>Qté</div><div>Prix unit. (k)</div><div>Sous-total</div><div></div>'
     +'</div>'
     +'<div id="craftResRows">';
   craftData.resources.forEach(function(r, i){
@@ -3105,7 +3105,9 @@ function renderCrafteur(){
 }
 
 function buildCraftResRow(i, r){
-  return '<div style="display:grid;grid-template-columns:1fr 50px 90px 70px 24px;gap:4px;align-items:center;margin-bottom:3px" id="craftRes'+i+'">'
+  var imgHtml = r.img ? '<img src="'+r.img+'" style="width:22px;height:22px;image-rendering:pixelated;border-radius:3px;flex-shrink:0">' : '<div style="width:22px;height:22px;background:var(--surface1);border-radius:3px;flex-shrink:0"></div>';
+  return '<div style="display:grid;grid-template-columns:24px 1fr 50px 90px 70px 24px;gap:4px;align-items:center;margin-bottom:3px" id="craftRes'+i+'">'
+    +imgHtml
     +'<div style="position:relative">'
     +'<input type="text" placeholder="Nom ressource" value="'+escapeHtml(r.name||'')+'" '
     +'oninput="craftData.resources['+i+'].name=this.value;craftResAutocomplete('+i+',this.value)" '

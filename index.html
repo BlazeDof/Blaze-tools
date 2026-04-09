@@ -11,29 +11,29 @@
   --base:   #1e1e2e;
   --mantle: #181825;
   --crust:  #11111b;
-  --surface0: #3b3d52;
-  --surface1: #51546d;
-  --surface2: #676b88;
-  --overlay0: #7d8299;
-  --overlay1: #8d92ab;
-  --overlay2: #a1a7c0;
-  --subtext0: #bac5dc;
-  --subtext1: #cfd8ea;
-  --text:   #e6edf9;
+  --surface0: #313244;
+  --surface1: #45475a;
+  --surface2: #585b70;
+  --overlay0: #6c7086;
+  --overlay1: #7f849c;
+  --overlay2: #9399b2;
+  --subtext0: #a6adc8;
+  --subtext1: #bac2de;
+  --text:   #cdd6f4;
 
-  --rosewater: #fff0ec;
-  --flamingo:  #ffdde0;
-  --pink:      #ffd2f7;
-  --mauve:     #dbb6ff;
-  --red:       #ff9bb8;
-  --maroon:    #fbb0bc;
-  --peach:     #ffc397;
-  --yellow:    #ffecbf;
-  --green:     #b6f3b1;
-  --teal:      #a4f2e5;
-  --sky:       #99ecfb;
-  --sapphire:  #84d7fc;
-  --blue:      #99c4ff;
+  --rosewater: #f5e0dc;
+  --flamingo:  #f2cdcd;
+  --pink:      #f5c2e7;
+  --mauve:     #cba6f7;
+  --red:       #f38ba8;
+  --maroon:    #eba0ac;
+  --peach:     #fab387;
+  --yellow:    #f9e2af;
+  --green:     #a6e3a1;
+  --teal:      #94e2d5;
+  --sky:       #89dceb;
+  --sapphire:  #74c7ec;
+  --blue:      #89b4fa;
   --lavender:  #b4befe;
 
   --radius: 10px;
@@ -42,7 +42,7 @@
 
 
 * { margin:0; padding:0; box-sizing:border-box; }
-body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif; color:var(--text); display:flex; flex-direction:column; font-size: 15px; line-height: 1.7; }
+body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif; color:var(--text); display:flex; flex-direction:column; }
 
 /* ── HEADER ───────────────────────────────────────── */
 .hdr {
@@ -72,7 +72,7 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
   cursor: pointer; transition: all .15s; border-radius: var(--radius-sm);
 }
 .vtab:hover { background: var(--surface0); color: var(--text); }
-.vtab.on { background: var(--blue); color: var(--mantle); font-weight: 600; }
+.vtab.on { background: var(--mauve); color: var(--mantle); font-weight: 600; }
 
 .hdr-right { display: flex; align-items: center; gap: .5rem; }
 .vtab-group { position: relative; }
@@ -87,7 +87,7 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
   cursor: pointer; border-radius: var(--radius-sm); transition: all .2s;
   display: flex; align-items: center; gap: .4rem;
 }
-.nbtn-hdr:hover, .nbtn-hdr.on { background: var(--blue); color: var(--mantle); }
+.nbtn-hdr:hover, .nbtn-hdr.on { background: var(--mauve); color: var(--mantle); }
 .ndot { width:6px; height:6px; border-radius:50%; background:var(--overlay0); transition:all .2s; }
 .nbtn-hdr.on .ndot { background: var(--mantle); }
 .mlcount { background: var(--red); color: var(--mantle); border-radius: 4px; padding: 0 5px; font-size: .6rem; font-weight: 700; margin-left: 2px; display: none; }
@@ -99,8 +99,8 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
 
 /* ── TOPBAR ───────────────────────────────────────── */
 .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; flex-wrap: wrap; gap: .5rem; }
-.mtitle { font-size: 1.3rem; font-weight: 600; color: var(--text); }
-.mtitle span { color: var(--blue); }
+.mtitle { font-size: 1.1rem; font-weight: 600; color: var(--text); }
+.mtitle span { color: var(--mauve); }
 .nav-row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
 
 .nbtn { background: var(--surface0); border: none; color: var(--subtext0); width: 30px; height: 30px; border-radius: var(--radius-sm); cursor: pointer; font-size: .8rem; transition: all .15s; display: flex; align-items: center; justify-content: center; }
@@ -154,7 +154,7 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
   border: 1.5px solid transparent;
 }
 .cday:hover { background: var(--surface1); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,.3); }
-.cday.sel { border-color: var(--blue); background: var(--surface1); box-shadow: 0 0 0 1px var(--blue), 0 4px 16px rgba(153,196,255,.25); }
+.cday.sel { border-color: var(--mauve); background: var(--surface1); box-shadow: 0 0 0 1px var(--mauve), 0 4px 16px rgba(203,166,247,.2); }
 .cday.tod { border-color: var(--blue); }
 .cday.tod .dnum { color: var(--blue); font-weight: 700; }
 .cday.oth { opacity: .2; pointer-events: none; }
@@ -199,29 +199,29 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
 .cinfo span { color: var(--mauve); font-weight: 600; }
 .loadmore { background: var(--surface0); border: none; color: var(--subtext0); width: 100%; padding: .6rem; border-radius: var(--radius-sm); cursor: pointer; font-size: .75rem; font-weight: 500; margin-top: 6px; transition: all .15s; font-family: 'Inter',sans-serif; }
 .loadmore:hover { background: var(--surface1); color: var(--text); }
-.lempty { text-align: center; padding: 3rem; color: var(--overlay1); font-size: .95rem; }
+.lempty { text-align: center; padding: 3rem; color: var(--overlay0); font-size: .85rem; }
 
 /* ── MA LISTE ─────────────────────────────────────── */
 .mlstats { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; margin-bottom: 1rem; }
 .mlstat { background: var(--surface0); border-radius: var(--radius-sm); padding: .7rem; text-align: center; }
-.mlval { font-size: 1.8rem; font-weight: 700; color: var(--blue); }
+.mlval { font-size: 1.5rem; font-weight: 700; color: var(--mauve); }
 .mllbl { font-size: .6rem; color: var(--overlay0); text-transform: uppercase; letter-spacing: .1em; margin-top: 2px; }
 
 /* ── PANEL ────────────────────────────────────────── */
-.ptitle { font-size: .7rem; font-weight: 600; letter-spacing: .15em; color: var(--overlay1); text-transform: uppercase; margin-bottom: .7rem; display: flex; align-items: center; gap: .5rem; }
+.ptitle { font-size: .62rem; font-weight: 600; letter-spacing: .15em; color: var(--overlay0); text-transform: uppercase; margin-bottom: .7rem; display: flex; align-items: center; gap: .5rem; }
 .ptitle::after { content: ''; flex: 1; height: 1px; background: var(--surface0); }
-.det-date { font-size: 1.1rem; font-weight: 600; color: var(--text); margin-bottom: .7rem; }
-.det-empty { color: var(--overlay1); font-size: .95rem; text-align: center; padding: 1.5rem 0; }
-.offrow { display: flex; align-items: center; gap: .8rem; background: var(--surface0); border-radius: var(--radius-sm); padding: .85rem; margin-bottom: .65rem; }
+.det-date { font-size: .95rem; font-weight: 600; color: var(--text); margin-bottom: .7rem; }
+.det-empty { color: var(--overlay0); font-size: .82rem; text-align: center; padding: 1.5rem 0; }
+.offrow { display: flex; align-items: center; gap: .8rem; background: var(--surface0); border-radius: var(--radius-sm); padding: .65rem; margin-bottom: .65rem; }
 .offimg { width: 44px; height: 44px; background: var(--base); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .offimg img { width: 36px; height: 36px; image-rendering: pixelated; }
-.offname { font-size: .95rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.offname { font-size: .85rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .offqty { font-size: .72rem; color: var(--mauve); margin-top: 2px; font-weight: 500; }
-.bblock { background: var(--surface0); border-radius: var(--radius-sm); border-left: 3px solid var(--mauve); padding: .85rem 1.1rem; margin-bottom: .6rem; }
+.bblock { background: var(--surface0); border-radius: var(--radius-sm); border-left: 3px solid var(--mauve); padding: .7rem .9rem; margin-bottom: .6rem; }
 .btags { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: .45rem; }
 .btag { font-size: .58rem; font-weight: 600; padding: 2px 7px; border-radius: 4px; }
-.bname { font-size: 1rem; font-weight: 600; color: var(--text); margin-bottom: .25rem; }
-.bdesc { font-size: .9rem; color: var(--subtext0); line-height: 1.7; }
+.bname { font-size: .9rem; font-weight: 600; color: var(--text); margin-bottom: .25rem; }
+.bdesc { font-size: .8rem; color: var(--subtext0); line-height: 1.55; }
 .bgod { display: flex; align-items: center; gap: .5rem; font-size: .72rem; color: var(--overlay1); margin-top: .5rem; }
 .addbtn { background: var(--surface0); border: none; color: var(--subtext0); width: 100%; padding: .5rem; border-radius: var(--radius-sm); cursor: pointer; font-size: .75rem; font-weight: 500; transition: all .15s; display: flex; align-items: center; justify-content: center; gap: .4rem; font-family: 'Inter',sans-serif; }
 .addbtn:hover { background: var(--surface1); color: var(--text); }
@@ -236,11 +236,11 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
 .toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(12px); background: var(--surface1); color: var(--text); padding: .6rem 1.2rem; border-radius: var(--radius-sm); font-size: .78rem; font-weight: 500; opacity: 0; transition: all .25s; z-index: 999; pointer-events: none; box-shadow: 0 4px 16px rgba(0,0,0,.4); }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 .pload { display: flex; align-items: center; gap: .6rem; padding: 1.5rem 0; justify-content: center; color: var(--overlay0); font-size: .8rem; }
-.spin { width: 18px; height: 18px; border: 2px solid var(--surface2); border-top-color: var(--blue); border-radius: 50%; animation: spin .8s linear infinite; }
+.spin { width: 18px; height: 18px; border: 2px solid var(--surface2); border-top-color: var(--mauve); border-radius: 50%; animation: spin .8s linear infinite; }
 .fi { animation: fi .25s ease both; }
 
 .tday.on { background: var(--mauve); color: var(--mantle); }
-.tcard { background: var(--surface0); border-radius: var(--radius); padding: 1rem 1.2rem; margin-bottom: 6px; display: grid; grid-template-columns: 46px 1fr auto; gap: .8rem; align-items: center; }
+.tcard { background: var(--surface0); border-radius: var(--radius); padding: .8rem 1rem; margin-bottom: 6px; display: grid; grid-template-columns: 46px 1fr auto; gap: .8rem; align-items: center; }
 .tcard.done { opacity: .45; }
 .tcard-dates { font-size: .65rem; color: var(--overlay0); margin-top: 3px; }
 .tcard-date-pill { display: inline-flex; align-items: center; gap: 3px; background: var(--surface1); border-radius: 4px; padding: 1px 6px; margin: 2px 2px 0 0; font-size: .62rem; color: var(--subtext0); }
@@ -280,16 +280,16 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
 .tprice-group { display:flex; flex-direction:column; gap:2px; }
 .tprice-label { font-size:.6rem; color:var(--overlay0); text-transform:uppercase; letter-spacing:.08em; }
 .tprice-group input, .tsales-input {
-  background:var(--surface1); border:2px solid var(--surface2); color:var(--text);
-  padding:6px 10px; border-radius:var(--radius-sm); font-size:.82rem; width:80px;
-  outline:none; font-family:Inter,sans-serif; font-weight:500;
+  background:var(--surface1); border:1px solid var(--surface2); color:var(--text);
+  padding:4px 8px; border-radius:var(--radius-sm); font-size:.78rem; width:80px;
+  outline:none; font-family:Inter,sans-serif;
   -moz-appearance:textfield; appearance:textfield;
 }
 .tprice-group input::-webkit-outer-spin-button,
 .tprice-group input::-webkit-inner-spin-button,
 .tsales-input::-webkit-outer-spin-button,
 .tsales-input::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
-.tprice-group input:focus, .tsales-input:focus { border-color:var(--blue); box-shadow: 0 0 0 3px rgba(153, 196, 255, 0.15); }
+.tprice-group input:focus, .tsales-input:focus { border-color:var(--mauve); }
 .tmargin { font-size:.78rem; font-weight:600; padding:3px 10px; border-radius:var(--radius-sm); }
 .tmargin.pos { background:rgba(166,227,161,.15); color:var(--green); }
 .tmargin.neg { background:rgba(243,139,168,.15); color:var(--red); }
@@ -307,8 +307,8 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
 /* ── Bloc-note ───────────────────────────────────── */
 .notes-layout { display:grid; grid-template-columns:220px 1fr; gap:12px; height:calc(100vh - 54px - 2.4rem); }
 .notes-sidebar { display:flex; flex-direction:column; gap:6px; }
-.notes-new-btn { background:var(--blue); border:none; color:var(--mantle); padding:.5rem .8rem; border-radius:var(--radius-sm); font-size:.78rem; font-weight:600; cursor:pointer; font-family:'Inter',sans-serif; transition:all .15s; display:flex; align-items:center; gap:.4rem; justify-content:center; }
-.notes-new-btn:hover { background:var(--sapphire); }
+.notes-new-btn { background:var(--mauve); border:none; color:var(--mantle); padding:.5rem .8rem; border-radius:var(--radius-sm); font-size:.78rem; font-weight:600; cursor:pointer; font-family:'Inter',sans-serif; transition:all .15s; display:flex; align-items:center; gap:.4rem; justify-content:center; }
+.notes-new-btn:hover { background:var(--lavender); }
 .notes-list { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:4px; }
 .notes-list::-webkit-scrollbar { width:4px; }
 .notes-list::-webkit-scrollbar-thumb { background:var(--surface1); border-radius:2px; }
@@ -339,7 +339,7 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
 .recap-perso input::-webkit-outer-spin-button, .recap-perso input::-webkit-inner-spin-button { -webkit-appearance:none; }
 .recap-progress { background:var(--surface0); border-radius:var(--radius-sm); padding:.6rem 1rem; margin-bottom:1rem; display:flex; align-items:center; gap:.8rem; }
 .recap-progress-bar-wrap { flex:1; background:var(--surface1); border-radius:3px; height:6px; }
-.recap-progress-bar { height:100%; border-radius:3px; background:var(--blue); transition:width .4s; }
+.recap-progress-bar { height:100%; border-radius:3px; background:var(--mauve); transition:width .4s; }
 .recap-progress-lbl { font-size:.72rem; color:var(--subtext0); white-space:nowrap; }
 .recap-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:1.2rem; }
 .recap-stat { background:var(--surface0); border-radius:var(--radius-sm); padding:.65rem .85rem; text-align:center; }
@@ -543,9 +543,9 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
 /* ── Dashboard ───────────────────────────────────── */
 .dash-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
 .dash-grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:12px; }
-.dash-card { background:var(--mantle); border-radius:var(--radius); padding:1.3rem 1.5rem; border:1.5px solid var(--surface0); transition:all .2s; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
-.dash-card-title { font-size:.65rem; font-weight:700; letter-spacing:.15em; color:var(--overlay1); text-transform:uppercase; margin-bottom:.8rem; display:flex; align-items:center; gap:.4rem; }
-.dash-card-title::after { content:''; flex:1; height:1.5px; background:var(--surface0); }
+.dash-card { background:var(--mantle); border-radius:var(--radius); padding:1.1rem 1.3rem; border:1.5px solid var(--surface0); transition:all .2s; }
+.dash-card-title { font-size:.6rem; font-weight:700; letter-spacing:.15em; color:var(--overlay0); text-transform:uppercase; margin-bottom:.7rem; display:flex; align-items:center; gap:.4rem; }
+.dash-card-title::after { content:''; flex:1; height:1px; background:var(--surface0); }
 .dash-hero { background:linear-gradient(135deg,var(--mantle),var(--surface0)); border-radius:var(--radius); padding:1.5rem; margin-bottom:12px; border:1.5px solid var(--surface0); display:flex; align-items:center; gap:1.2rem; }
 .dash-hero-img { width:64px; height:64px; background:var(--base); border-radius:var(--radius); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 .dash-hero-img img { width:56px; height:56px; image-rendering:pixelated; }
@@ -554,10 +554,10 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
 .dash-hero-desc { font-size:.78rem; color:var(--subtext0); line-height:1.5; }
 .dash-hero-badge { font-size:.62rem; font-weight:600; padding:3px 8px; border-radius:4px; display:inline-block; margin-bottom:.4rem; }
 .dash-stat { text-align:center; }
-.dash-stat-v { font-size:1.8rem; font-weight:700; }
+.dash-stat-v { font-size:1.5rem; font-weight:700; }
 .dash-stat-l { font-size:.6rem; color:var(--overlay0); text-transform:uppercase; letter-spacing:.08em; margin-top:3px; }
 .dash-progress { background:var(--surface0); border-radius:3px; height:8px; margin:.5rem 0; overflow:hidden; }
-.dash-progress-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,var(--blue),var(--sapphire)); transition:width .6s; }
+.dash-progress-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,var(--mauve),var(--peach)); transition:width .6s; }
 .dash-list-item { display:flex; align-items:center; gap:.5rem; padding:.4rem .5rem; background:var(--surface0); border-radius:var(--radius-sm); margin-bottom:3px; font-size:.75rem; cursor:pointer; transition:background .1s; }
 .dash-list-item:hover { background:var(--surface1); }
 .dash-shortcut { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.4rem; padding:1rem; background:var(--surface0); border-radius:var(--radius); cursor:pointer; transition:all .15s; border:1.5px solid transparent; font-size:.75rem; font-weight:500; color:var(--subtext0); }
@@ -574,8 +574,8 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
   <div class="logo">
     <div class="logo-dot" style="background:none;border:none;">
       <svg width="28" height="28" viewBox="0 0 28 28">
-        <circle cx="14" cy="14" r="13" fill="#313244" stroke="#99c4ff" stroke-width="2"/>
-        <text x="14" y="20" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="700" fill="#99c4ff">B</text>
+        <circle cx="14" cy="14" r="13" fill="#313244" stroke="#cba6f7" stroke-width="2"/>
+        <text x="14" y="20" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="700" fill="#cba6f7">B</text>
       </svg>
     </div>
     <div>
@@ -617,7 +617,7 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
     <label class="nbtn-hdr" title="Restaurer depuis une sauvegarde" style="cursor:pointer;">
       📂 Import<input type="file" accept=".json" onchange="importData(event)" style="display:none;">
     </label>
-    <button class="nbtn-hdr" onclick="showSyncModal()" title="Synchroniser via GitHub Gist">☁️ Sync</button>
+    <button class="nbtn-hdr" onclick="showSyncModal()" title="Synchroniser via Firestore">☁️ Sync</button>
     <button class="nbtn-hdr" id="nBtn" onclick="toggleNotif()">
       <div class="ndot" id="nDot"></div>
       <span id="nLbl">Rappel</span>
@@ -734,6 +734,8 @@ body { background:var(--base); min-height:100vh; font-family:'Inter',sans-serif;
 
 <div class="toast" id="toast"></div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
 /* ── Catégories ─────────────────────────────────── */
 var CATS = [
@@ -3499,15 +3501,45 @@ function importData(event){
 }
 
 try{if(localStorage.getItem('alm_n')){notif=true;updateNBtn();}}catch(e){}
-/* ── GitHub Gist Sync ─────────────────────────────── */
-var gistToken = '';
-var gistId = '';
-try { gistToken = localStorage.getItem('alm_gist_token') || ''; } catch(e){}
-try { gistId = localStorage.getItem('alm_gist_id') || ''; } catch(e){}
+/* ── Firebase / Firestore Sync ─────────────────────── */
+var db = null;
+var _deviceId = '';
+var _firestoreSyncing = false;
+var _firestoreDebounce = null;
+var _ignoreNextSnapshot = false;
+var _firestoreReady = false;
+var _unsubFirestore = null;
 
-function saveGistConfig(){
-  try { localStorage.setItem('alm_gist_token', gistToken); } catch(e){}
-  try { localStorage.setItem('alm_gist_id', gistId); } catch(e){}
+try { _deviceId = localStorage.getItem('blaze_device_id') || ''; } catch(e){}
+if(!_deviceId){
+  _deviceId = 'dev_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2,8);
+  try { localStorage.setItem('blaze_device_id', _deviceId); } catch(e){}
+}
+
+function _initFirebase(){
+  if(typeof firebase === 'undefined' || !firebase.initializeApp){
+    console.warn('Firebase SDK not loaded — sync disabled');
+    return false;
+  }
+  try {
+    firebase.initializeApp({
+      apiKey: "AIzaSyAwXTFr4ejnbmRfrFQfmXqlnw21Xp_Yyuw",
+      authDomain: "nosdepenses-d3848.firebaseapp.com",
+      projectId: "nosdepenses-d3848",
+      storageBucket: "nosdepenses-d3848.firebasestorage.app",
+      messagingSenderId: "258854810593",
+      appId: "1:258854810593:web:430439b44c3ebe80b6d8a0"
+    });
+    db = firebase.firestore();
+    return true;
+  } catch(e){
+    console.error('Firebase init error:', e);
+    return false;
+  }
+}
+
+function _getFirestoreDocRef(){
+  return db ? db.collection('blazetools').doc(_deviceId) : null;
 }
 
 function _getAllSaveData(){
@@ -3518,142 +3550,135 @@ function _getAllSaveData(){
     var v = localStorage.getItem(k);
     if(v!==null) save.data[k] = v;
   });
+  for(var i=0; i<localStorage.length; i++){
+    var k = localStorage.key(i);
+    if(k && k.indexOf('week_') === 0){
+      save.data[k] = localStorage.getItem(k);
+    }
+  }
   return save;
 }
 
-function gistPush(){
-  if(!gistToken){ toast('❌ Token non configuré'); return; }
-  var payload = JSON.stringify(_getAllSaveData(), null, 2);
-  var body = { description: 'Blaze-Tools save', public: false, files: { 'blaze-tools-save.json': { content: payload } } };
-
-  var url, method;
-  if(gistId){
-    url = 'https://api.github.com/gists/' + gistId;
-    method = 'PATCH';
-  } else {
-    url = 'https://api.github.com/gists';
-    method = 'POST';
-  }
-
-  toast('☁️ Envoi en cours...');
-  fetch(url, {
-    method: method,
-    headers: { 'Authorization': 'Bearer ' + gistToken, 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  }).then(function(r){
-    if(!r.ok) throw new Error('HTTP ' + r.status);
-    return r.json();
-  }).then(function(data){
-    if(!gistId && data.id){
-      gistId = data.id;
-      saveGistConfig();
-      var el = document.getElementById('gistIdDisplay');
-      if(el) el.textContent = gistId;
-    }
-    toast('✅ Données envoyées !');
-    try { localStorage.setItem('alm_gist_last_sync', String(Date.now())); } catch(e){}
-    var el = document.getElementById('syncLastDate');
-    if(el) el.textContent = 'Dernière sync : ' + new Date().toLocaleString('fr-FR');
+function firestorePush(){
+  var ref = _getFirestoreDocRef();
+  if(!ref){ toast('❌ Firebase non chargé'); return Promise.resolve(); }
+  if(_firestoreSyncing) return Promise.resolve();
+  _firestoreSyncing = true;
+  _setSaveStatus('saving');
+  _ignoreNextSnapshot = true;
+  var save = _getAllSaveData();
+  return ref.set({
+    deviceId: _deviceId,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    payload: JSON.stringify(save)
+  }).then(function(){
+    _setSaveStatus('ok');
+    toast('✅ Données synchronisées !');
   }).catch(function(e){
-    toast('❌ Erreur push : ' + e.message);
+    _setSaveStatus('err');
+    toast('❌ Erreur sync : ' + e.message);
+    console.error('Firestore push error:', e);
+  }).finally(function(){
+    _firestoreSyncing = false;
   });
 }
 
-function gistPull(){
-  if(!gistToken){ toast('❌ Token non configuré'); return; }
-  if(!gistId){ toast('❌ Aucun Gist lié — fais d\'abord un push'); return; }
-
-  toast('☁️ Récupération...');
-  fetch('https://api.github.com/gists/' + gistId, {
-    headers: { 'Authorization': 'Bearer ' + gistToken }
-  }).then(function(r){
-    if(!r.ok) throw new Error('HTTP ' + r.status);
-    return r.json();
-  }).then(function(data){
-    var file = data.files && data.files['blaze-tools-save.json'];
-    if(!file || !file.content) throw new Error('Fichier non trouvé dans le Gist');
-    var save = JSON.parse(file.content);
-    if(!save || !save.data) throw new Error('Format invalide');
-    var count = 0;
-    Object.keys(save.data).forEach(function(k){
-      if(SAVE_KEYS.indexOf(k) !== -1 || k.indexOf('alm_ocre_p_') === 0){
-        localStorage.setItem(k, save.data[k]);
-        count++;
-      }
-    });
-    toast('✅ ' + count + ' entrées restaurées — rechargement...');
+function firestorePull(){
+  var ref = _getFirestoreDocRef();
+  if(!ref){ toast('❌ Firebase non chargé'); return Promise.resolve(); }
+  _setSaveStatus('saving');
+  return ref.get().then(function(doc){
+    if(!doc.exists){
+      toast('ℹ️ Aucune donnée trouvée — fais d\'abord un push');
+      _setSaveStatus('err');
+      return;
+    }
+    var raw = doc.data();
+    var save = JSON.parse(raw.payload || '{}');
+    if(!save || !save.data){ toast('❌ Format invalide'); _setSaveStatus('err'); return; }
+    _applyRemoteData(save);
+    toast('✅ Données récupérées — rechargement...');
     setTimeout(function(){ location.reload(); }, 1200);
   }).catch(function(e){
+    _setSaveStatus('err');
     toast('❌ Erreur pull : ' + e.message);
   });
 }
 
-/* ── Auto-sync ────────────────────────────────────── */
-var _gistSyncDebounce = null;
-var _gistSyncing = false;
-
-function triggerAutoSync(){
-  if(!gistToken || !gistId) return;
-  clearTimeout(_gistSyncDebounce);
-  _gistSyncDebounce = setTimeout(_doGistPush, 1500);
+function _applyRemoteData(save){
+  var count = 0;
+  Object.keys(save.data).forEach(function(k){
+    if(SAVE_KEYS.indexOf(k) !== -1 || k.indexOf('alm_ocre_p_') === 0 || k.indexOf('alm_ocre_') === 0 || k.indexOf('week_') === 0){
+      localStorage.setItem(k, save.data[k]);
+      count++;
+    }
+  });
+  return count;
 }
 
-function _doGistPush(){
-  if(!gistToken || !gistId || _gistSyncing) return;
-  _gistSyncing = true;
-  var payload = JSON.stringify(_getAllSaveData(), null, 2);
-  fetch('https://api.github.com/gists/' + gistId, {
-    method: 'PATCH',
-    headers: { 'Authorization': 'Bearer ' + gistToken, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ files: { 'blaze-tools-save.json': { content: payload } } })
-  }).then(function(r){
-    if(!r.ok) throw new Error('HTTP ' + r.status);
-    try { localStorage.setItem('alm_gist_last_sync', String(Date.now())); } catch(e){}
+function triggerAutoSync(){
+  if(!db) return;
+  clearTimeout(_firestoreDebounce);
+  _firestoreDebounce = setTimeout(_doFirestorePush, 2000);
+}
+
+function _doFirestorePush(){
+  var ref = _getFirestoreDocRef();
+  if(!ref || _firestoreSyncing) return;
+  _firestoreSyncing = true;
+  _ignoreNextSnapshot = true;
+  var save = _getAllSaveData();
+  ref.set({
+    deviceId: _deviceId,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    payload: JSON.stringify(save)
+  }).then(function(){
     _setSaveStatus('ok');
   }).catch(function(e){
     console.warn('Auto-sync push failed:', e.message);
-  }).finally(function(){ _gistSyncing = false; });
+  }).finally(function(){
+    _firestoreSyncing = false;
+  });
 }
 
-// Push quand on quitte la page
-window.addEventListener('beforeunload', function(){
-  if(!gistToken || !gistId) return;
-  var payload = JSON.stringify(_getAllSaveData(), null, 2);
-  navigator.sendBeacon('https://api.github.com/gists/' + gistId, new Blob([JSON.stringify({ files: { 'blaze-tools-save.json': { content: payload } } })], {type:'application/json'}));
-});
-
-function autoSyncPull(){
-  if(!gistToken || !gistId) return;
-  fetch('https://api.github.com/gists/' + gistId, {
-    headers: { 'Authorization': 'Bearer ' + gistToken }
-  }).then(function(r){
-    if(!r.ok) throw new Error('HTTP ' + r.status);
-    return r.json();
-  }).then(function(data){
-    var file = data.files && data.files['blaze-tools-save.json'];
-    if(!file || !file.content) return;
-    var save = JSON.parse(file.content);
-    if(!save || !save.data || !save.date) return;
-    var remoteDate = new Date(save.date).getTime();
-    var lastSync = 0;
-    try { lastSync = parseInt(localStorage.getItem('alm_gist_last_sync') || '0'); } catch(e){}
-    if(remoteDate > lastSync + 5000){
-      var count = 0;
-      Object.keys(save.data).forEach(function(k){
-        if(SAVE_KEYS.indexOf(k) !== -1 || k.indexOf('alm_ocre_p_') === 0){
-          localStorage.setItem(k, save.data[k]);
-          count++;
-        }
-      });
+function _startRealtimeSync(){
+  var ref = _getFirestoreDocRef();
+  if(!ref) return;
+  if(_unsubFirestore) _unsubFirestore();
+  _unsubFirestore = ref.onSnapshot(function(doc){
+    if(!doc.exists) return;
+    if(_ignoreNextSnapshot){ _ignoreNextSnapshot = false; return; }
+    if(_firestoreSyncing) return;
+    var raw = doc.data();
+    if(!raw || !raw.payload) return;
+    try {
+      var save = JSON.parse(raw.payload);
+      if(!save || !save.data) return;
+      var count = _applyRemoteData(save);
       if(count > 0){
-        try { localStorage.setItem('alm_gist_last_sync', String(remoteDate)); } catch(e){}
-        console.log('Auto-sync: pulled ' + count + ' entries from Gist');
+        console.log('Firestore realtime: applied ' + count + ' entries from remote');
         location.reload();
       }
+    } catch(e){
+      console.warn('Firestore realtime parse error:', e);
     }
-  }).catch(function(e){
-    console.warn('Auto-sync pull failed:', e.message);
+  }, function(err){
+    console.warn('Firestore listener error:', err);
   });
+  _firestoreReady = true;
+}
+
+window.addEventListener('beforeunload', function(){
+  // Auto-sync debounce should have already pushed
+});
+
+function linkDevice(newId){
+  if(!newId || newId === _deviceId) return;
+  _deviceId = newId.trim();
+  try { localStorage.setItem('blaze_device_id', _deviceId); } catch(e){}
+  toast('🔗 Lié à ' + _deviceId.slice(-8) + ' — récupération...');
+  firestorePull();
+  _startRealtimeSync();
 }
 
 function showSyncModal(){
@@ -3662,44 +3687,45 @@ function showSyncModal(){
   overlay.id = 'syncModal';
   overlay.onclick = function(e){ if(e.target===overlay) overlay.remove(); };
 
-  var tokenMasked = gistToken ? '••••••••' + gistToken.slice(-4) : '';
+  var fbStatus = db ? '🟢 Connecté' : '🔴 Firebase non chargé';
 
   overlay.innerHTML = '<div class="ocre-modal">'
-    +'<div class="ocre-modal-title">☁️ Synchronisation GitHub <button class="ocre-modal-close" onclick="document.getElementById(\'syncModal\').remove()">✕</button></div>'
+    +'<div class="ocre-modal-title">☁️ Synchronisation Firestore <button class="ocre-modal-close" onclick="document.getElementById(\'syncModal\').remove()">✕</button></div>'
 
     +'<div style="font-size:.72rem;color:var(--subtext0);line-height:1.5;margin-bottom:1rem">'
-    +'Synchronise tes données via un <strong style="color:var(--text)">GitHub Gist privé</strong>. '
-    +'Ça te permet de retrouver tes données sur n\'importe quel appareil.'
+    +'Tes données sont synchronisées en <strong style="color:var(--text)">temps réel via Firestore</strong>. '
+    +'Pour retrouver tes données sur un autre appareil, copie ton ID ou lie un ID existant.'
+    +'<div style="margin-top:.4rem;font-size:.65rem;color:'+(db?'var(--green)':'var(--red)')+'">'+fbStatus+'</div>'
     +'</div>'
 
     +'<div style="margin-bottom:.8rem">'
-    +'<label style="font-size:.62rem;font-weight:700;color:var(--overlay0);text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:.3rem">Token GitHub</label>'
-    +'<div style="display:flex;gap:6px">'
-    +'<input id="gistTokenInput" type="password" placeholder="ghp_xxxxxxxxxxxx" value="'+gistToken+'" '
-    +'style="flex:1;background:var(--surface0);border:1.5px solid var(--surface1);color:var(--text);padding:.4rem .6rem;border-radius:var(--radius-sm);font-size:.75rem;font-family:Inter,sans-serif;outline:none">'
-    +'<button onclick="gistToken=document.getElementById(\'gistTokenInput\').value.trim();saveGistConfig();toast(\'✅ Token sauvegardé\')" '
-    +'style="background:var(--surface0);border:none;color:var(--subtext0);padding:.4rem .8rem;border-radius:var(--radius-sm);font-size:.72rem;cursor:pointer;font-family:Inter,sans-serif;white-space:nowrap">Sauver</button>'
+    +'<label style="font-size:.62rem;font-weight:700;color:var(--overlay0);text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:.3rem">Ton ID appareil</label>'
+    +'<div style="display:flex;gap:6px;align-items:center">'
+    +'<input id="deviceIdDisplay" type="text" readonly value="'+_deviceId+'" '
+    +'style="flex:1;background:var(--surface0);border:1.5px solid var(--surface1);color:var(--text);padding:.4rem .6rem;border-radius:var(--radius-sm);font-size:.7rem;font-family:monospace;outline:none">'
+    +'<button onclick="navigator.clipboard.writeText(document.getElementById(\'deviceIdDisplay\').value);toast(\'📋 ID copié !\')" '
+    +'style="background:var(--surface0);border:none;color:var(--subtext0);padding:.4rem .8rem;border-radius:var(--radius-sm);font-size:.72rem;cursor:pointer;font-family:Inter,sans-serif;white-space:nowrap">📋 Copier</button>'
     +'</div>'
-    +'<div style="font-size:.58rem;color:var(--overlay0);margin-top:.3rem">Crée un token sur <a href="https://github.com/settings/tokens/new" target="_blank" style="color:var(--blue)">github.com/settings/tokens</a> avec le scope <strong>gist</strong> uniquement.</div>'
+    +'<div style="font-size:.58rem;color:var(--overlay0);margin-top:.3rem">Copie cet ID pour le coller sur un autre appareil.</div>'
     +'</div>'
 
     +'<div style="margin-bottom:1rem">'
-    +'<label style="font-size:.62rem;font-weight:700;color:var(--overlay0);text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:.3rem">Gist ID <span style="font-weight:400;text-transform:none">(auto après 1er push)</span></label>'
+    +'<label style="font-size:.62rem;font-weight:700;color:var(--overlay0);text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:.3rem">Lier un autre appareil</label>'
     +'<div style="display:flex;gap:6px">'
-    +'<input id="gistIdInput" type="text" placeholder="Créé automatiquement..." value="'+gistId+'" '
-    +'style="flex:1;background:var(--surface0);border:1.5px solid var(--surface1);color:var(--text);padding:.4rem .6rem;border-radius:var(--radius-sm);font-size:.75rem;font-family:Inter,sans-serif;outline:none">'
-    +'<button onclick="gistId=document.getElementById(\'gistIdInput\').value.trim();saveGistConfig();toast(\'✅ Gist ID sauvegardé\')" '
-    +'style="background:var(--surface0);border:none;color:var(--subtext0);padding:.4rem .8rem;border-radius:var(--radius-sm);font-size:.72rem;cursor:pointer;font-family:Inter,sans-serif;white-space:nowrap">Sauver</button>'
+    +'<input id="linkDeviceInput" type="text" placeholder="Colle l\'ID de l\'autre appareil..." '
+    +'style="flex:1;background:var(--surface0);border:1.5px solid var(--surface1);color:var(--text);padding:.4rem .6rem;border-radius:var(--radius-sm);font-size:.7rem;font-family:monospace;outline:none">'
+    +'<button onclick="linkDevice(document.getElementById(\'linkDeviceInput\').value)" '
+    +'style="background:var(--blue);border:none;color:var(--mantle);padding:.4rem .8rem;border-radius:var(--radius-sm);font-size:.72rem;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;white-space:nowrap">🔗 Lier</button>'
     +'</div>'
-    +'<div style="font-size:.58rem;color:var(--overlay0);margin-top:.3rem">Si tu as déjà un Gist sur un autre appareil, colle son ID ici pour récupérer les données.</div>'
+    +'<div style="font-size:.58rem;color:var(--overlay0);margin-top:.3rem">⚠️ Cela remplacera tes données locales par celles de cet appareil.</div>'
     +'</div>'
 
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:.8rem">'
-    +'<button onclick="gistPush()" style="background:var(--mauve);border:none;color:var(--mantle);padding:.55rem;border-radius:var(--radius-sm);font-size:.78rem;font-weight:600;cursor:pointer;font-family:Inter,sans-serif">⬆️ Push (envoyer)</button>'
-    +'<button onclick="gistPull()" style="background:var(--surface0);border:1.5px solid var(--mauve);color:var(--mauve);padding:.55rem;border-radius:var(--radius-sm);font-size:.78rem;font-weight:600;cursor:pointer;font-family:Inter,sans-serif">⬇️ Pull (récupérer)</button>'
+    +'<button onclick="firestorePush()" style="background:var(--mauve);border:none;color:var(--mantle);padding:.55rem;border-radius:var(--radius-sm);font-size:.78rem;font-weight:600;cursor:pointer;font-family:Inter,sans-serif">⬆️ Push</button>'
+    +'<button onclick="firestorePull()" style="background:var(--surface0);border:1.5px solid var(--mauve);color:var(--mauve);padding:.55rem;border-radius:var(--radius-sm);font-size:.78rem;font-weight:600;cursor:pointer;font-family:Inter,sans-serif">⬇️ Pull</button>'
     +'</div>'
 
-    +'<div id="syncLastDate" style="font-size:.6rem;color:var(--overlay0);text-align:center"></div>'
+    +'<div style="font-size:.55rem;color:var(--overlay0);text-align:center">Sync automatique — push à chaque modification, écoute temps réel.</div>'
 
     +'</div>';
 
@@ -3712,9 +3738,9 @@ renderCal();
 setTimeout(function(){sel(fmt(tod));loadHistory();loadNextML();},60);
 // Show dashboard on load
 setView('dash');
-// Auto-sync pull on load
-setTimeout(autoSyncPull, 500);
-setInterval(autoSyncPull, 30000);
+// Start Firestore real-time sync
+setTimeout(function(){ if(_initFirebase()){ _startRealtimeSync(); _doFirestorePush(); } }, 500);
+setInterval(function(){ if(db && !_firestoreSyncing) _doFirestorePush(); }, 60000);
 fetchDay(fmt(tod)).then(function(data){
   if(!data) return;
   var nm=(data.bonus&&data.bonus.type&&data.bonus.type.name)||'';

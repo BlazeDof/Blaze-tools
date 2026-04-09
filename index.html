@@ -810,6 +810,7 @@ function saveMyList(){try{localStorage.setItem('alm_mylist',JSON.stringify(Objec
 function inML(ds){return !!myList[ds];}
 function pad(n){return n<10?'0'+n:''+n;}
 function fmtK(n){return Math.round(n).toLocaleString('fr-FR');}
+function fmtKamas(n){ return Math.round(n).toLocaleString('fr-FR') + ' k'; }
 function fmt(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
 function fmtFR(d){return d.getDate()+' '+MO[d.getMonth()]+' '+d.getFullYear();}
 function fmtFRDay(d){var j=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];return j[d.getDay()]+' '+d.getDate()+' '+MO[d.getMonth()]+' '+d.getFullYear();}
@@ -1702,7 +1703,7 @@ function tBadge(score,rank){
   return['var(--mantle)','rgba(243,139,168,.5)','Éviter'];
 }
 
-function fmtTei(n){ return Math.round(n).toLocaleString('fr-FR'); }
+function fmtTei(n){ if(!n && n!==0) return ''; return Math.round(n).toLocaleString('fr-FR'); }
 function parseTei(s){ return parseFloat((s+'').replace(/\s/g,'').replace(/,/g,'.')) || 0; }
 
 function renderTItems(){
@@ -3017,11 +3018,12 @@ function renderCrafteur(){
   var html = '';
 
   // Équipement
+  var craftItemImg = craftData.img || '';
   html += '<div style="background:var(--mantle);border-radius:var(--radius);border:1.5px solid var(--surface0);padding:1rem 1.2rem;margin-bottom:.8rem">'
     +'<div style="font-size:.62rem;font-weight:700;letter-spacing:.12em;color:var(--peach);text-transform:uppercase;margin-bottom:.6rem">▸ Équipement</div>'
     +'<div style="position:relative">'
     +'<div style="display:flex;align-items:center;gap:.5rem">'
-    +'<span style="font-size:.72rem;color:var(--subtext0);font-weight:600">Nom :</span>'
+    +(craftItemImg?'<img src="'+craftItemImg+'" style="width:36px;height:36px;image-rendering:pixelated;border-radius:6px;flex-shrink:0;background:var(--surface0)">':'<div style="width:36px;height:36px;background:var(--surface0);border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1rem;opacity:.3">🔍</div>')
     +'<input id="craftItemName" type="text" placeholder="Rechercher un item Dofus..." value="'+escapeHtml(craftData.name)+'" '
     +'oninput="craftItemAutocomplete(this.value)" '
     +'style="flex:1;background:var(--surface0);border:1.5px solid var(--surface1);color:var(--text);padding:.4rem .6rem;border-radius:var(--radius-sm);font-size:.78rem;font-family:Inter,sans-serif;outline:none">'
@@ -3033,8 +3035,8 @@ function renderCrafteur(){
   // Ressources nécessaires
   html += '<div style="background:var(--mantle);border-radius:var(--radius);border:1.5px solid var(--surface0);padding:1rem 1.2rem;margin-bottom:.8rem">'
     +'<div style="font-size:.62rem;font-weight:700;letter-spacing:.12em;color:var(--red);text-transform:uppercase;margin-bottom:.6rem">▸ Ressources nécessaires</div>'
-    +'<div style="display:grid;grid-template-columns:1fr 50px 90px 70px 24px;gap:4px;margin-bottom:4px;font-size:.55rem;color:var(--overlay0);font-weight:600;text-transform:uppercase;letter-spacing:.08em;padding:0 2px">'
-    +'<div>Ressource</div><div>Qté</div><div>Prix unit. (k)</div><div>Sous-total</div><div></div>'
+    +'<div style="display:grid;grid-template-columns:24px 1fr 50px 90px 70px 24px;gap:4px;margin-bottom:4px;font-size:.55rem;color:var(--overlay0);font-weight:600;text-transform:uppercase;letter-spacing:.08em;padding:0 2px">'
+    +'<div></div><div>Ressource</div><div>Qté</div><div>Prix unit. (k)</div><div>Sous-total</div><div></div>'
     +'</div>'
     +'<div id="craftResRows">';
   craftData.resources.forEach(function(r, i){
@@ -3093,8 +3095,8 @@ function renderCrafteur(){
       var profitColor = profit > 0 ? 'var(--green)' : profit < 0 ? 'var(--red)' : 'var(--overlay0)';
       html += '<div style="display:flex;align-items:center;gap:.5rem;background:var(--surface0);border-radius:var(--radius-sm);padding:.5rem .7rem;margin-bottom:4px;cursor:pointer" onclick="loadCraft('+i+')">'
         +'<div style="flex:1;min-width:0"><div style="font-size:.75rem;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+(s.name||'Sans nom')+'</div>'
-        +'<div style="font-size:.6rem;color:var(--overlay1)">Coût: '+fmtK(s.cost/1000)+'k — Vente: '+fmtK((s.sellHDV||0)/1000)+'k</div></div>'
-        +'<div style="font-size:.72rem;font-weight:700;color:'+profitColor+'">'+(profit>=0?'+':'')+fmtK(profit/1000)+'k</div>'
+        +'<div style="font-size:.6rem;color:var(--overlay1)">Coût: '+fmtK(s.cost)+' k — Vente: '+fmtK(s.sellHDV||0)+' k</div></div>'
+        +'<div style="font-size:.72rem;font-weight:700;color:'+profitColor+'">'+(profit>=0?'+':'')+fmtK(profit)+' k</div>'
         +'<button onclick="event.stopPropagation();deleteCraft('+i+')" style="background:none;border:none;color:var(--overlay0);cursor:pointer;font-size:.7rem;padding:.2rem">🗑️</button>'
         +'</div>';
     });
@@ -3107,7 +3109,9 @@ function renderCrafteur(){
 }
 
 function buildCraftResRow(i, r){
-  return '<div style="display:grid;grid-template-columns:1fr 50px 90px 70px 24px;gap:4px;align-items:center;margin-bottom:3px" id="craftRes'+i+'">'
+  var imgHtml = r.img ? '<img src="'+r.img+'" style="width:22px;height:22px;image-rendering:pixelated;border-radius:3px;flex-shrink:0">' : '<div style="width:22px;height:22px;background:var(--surface1);border-radius:3px;flex-shrink:0"></div>';
+  return '<div style="display:grid;grid-template-columns:24px 1fr 50px 90px 70px 24px;gap:4px;align-items:center;margin-bottom:3px" id="craftRes'+i+'">'
+    +imgHtml
     +'<div style="position:relative">'
     +'<input type="text" placeholder="Nom ressource" value="'+escapeHtml(r.name||'')+'" '
     +'oninput="craftData.resources['+i+'].name=this.value;craftResAutocomplete('+i+',this.value)" '
@@ -3120,7 +3124,7 @@ function buildCraftResRow(i, r){
     +'<input type="text" inputmode="numeric" placeholder="0" value="'+(r.price?fmtTei(r.price):'')+'" '
     +'oninput="craftData.resources['+i+'].price=parseTei(this.value)||0;this.value=fmtTei(parseTei(this.value))||this.value;updateCraftResult()" '
     +'style="width:100%;background:var(--surface0);border:1px solid var(--surface1);color:var(--text);padding:.3rem .4rem;border-radius:var(--radius-sm);font-size:.72rem;font-family:Inter,sans-serif;outline:none">'
-    +'<div style="font-size:.7rem;color:var(--subtext0);text-align:right" id="craftSubtotal'+i+'">'+fmtK(((r.qty||1)*(r.price||0))/1000)+'k</div>'
+    +'<div style="font-size:.7rem;color:var(--subtext0);text-align:right" id="craftSubtotal'+i+'">'+fmtK((r.qty||1)*(r.price||0))+' k</div>'
     +'<button onclick="removeCraftRes('+i+')" style="background:none;border:none;color:var(--overlay0);cursor:pointer;font-size:.7rem;padding:0">✕</button>'
     +'</div>';
 }
@@ -3141,10 +3145,10 @@ function updateCraftResult(){
     var sub = (r.qty||1) * (r.price||0);
     totalCost += sub;
     var el = document.getElementById('craftSubtotal'+i);
-    if(el) el.textContent = fmtK(sub/1000)+'k';
+    if(el) el.textContent = fmtK(sub) + ' k';
   });
   var costEl = document.getElementById('craftTotalCost');
-  if(costEl) costEl.textContent = fmtK(totalCost/1000);
+  if(costEl) costEl.textContent = fmtK(totalCost);
 
   var taxRate = 0.02;
   var sellHDV = craftData.sellHDV || 0;
@@ -3153,9 +3157,9 @@ function updateCraftResult(){
   var netFinal = Math.floor(sellFinal * (1 - taxRate));
 
   var netHDVEl = document.getElementById('craftNetHDV');
-  if(netHDVEl) netHDVEl.textContent = sellHDV ? 'Net : '+fmtK(netHDV/1000)+'k' : '';
+  if(netHDVEl) netHDVEl.textContent = sellHDV ? 'Net : '+fmtK(netHDV)+' k' : '';
   var netFinalEl = document.getElementById('craftNetFinal');
-  if(netFinalEl) netFinalEl.textContent = sellFinal ? 'Net : '+fmtK(netFinal/1000)+'k' : '';
+  if(netFinalEl) netFinalEl.textContent = sellFinal ? 'Net : '+fmtK(netFinal)+' k' : '';
 
   var profitHDV = netHDV - totalCost;
   var profitFinal = netFinal - totalCost;
@@ -3169,9 +3173,9 @@ function updateCraftResult(){
     var pColor = profit > 0 ? 'var(--green)' : profit < 0 ? 'var(--red)' : 'var(--overlay0)';
     return '<div style="background:var(--surface0);border-radius:var(--radius-sm);padding:.7rem .8rem">'
       +'<div style="font-size:.58rem;font-weight:700;color:'+color+';text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem">'+icon+' '+label+'</div>'
-      +'<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:.65rem;color:var(--overlay1)">Coût craft</span><span style="font-size:.68rem;color:var(--text)">'+fmtK(totalCost/1000)+'k</span></div>'
-      +'<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:.65rem;color:var(--overlay1)">Net après taxe</span><span style="font-size:.68rem;font-weight:600;color:var(--text)">'+fmtK(net/1000)+'k</span></div>'
-      +'<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:.65rem;color:var(--overlay1)">Profit</span><span style="font-size:.72rem;font-weight:700;color:'+pColor+'">'+(profit>=0?'+':'')+fmtK(profit/1000)+'k</span></div>'
+      +'<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:.65rem;color:var(--overlay1)">Coût craft</span><span style="font-size:.68rem;color:var(--text)">'+fmtK(totalCost)+' k</span></div>'
+      +'<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:.65rem;color:var(--overlay1)">Net après taxe</span><span style="font-size:.68rem;font-weight:600;color:var(--text)">'+fmtK(net)+' k</span></div>'
+      +'<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:.65rem;color:var(--overlay1)">Profit</span><span style="font-size:.72rem;font-weight:700;color:'+pColor+'">'+(profit>=0?'+':'')+fmtK(profit)+' k</span></div>'
       +'<div style="display:flex;justify-content:space-between"><span style="font-size:.65rem;color:var(--overlay1)">Rentabilité</span><span style="font-size:.68rem;font-weight:600;color:'+pColor+'">'+renta+'%</span></div>'
       +'</div>';
   }
@@ -3188,7 +3192,7 @@ function craftItemAutocomplete(val){
     sug.innerHTML = results.map(function(r){
       return '<div style="display:flex;align-items:center;gap:.5rem;padding:.4rem .6rem;cursor:pointer;font-size:.72rem;color:var(--text);transition:background .1s" '
         +'onmouseover="this.style.background=\'var(--surface0)\'" onmouseout="this.style.background=\'none\'" '
-        +'onclick="selectCraftItem(\''+escapeHtml(r.name).replace(/'/g,"\\'")+'\','+r.id+',\''+r.cat+'\')">'
+        +'onclick="selectCraftItem(\''+escapeHtml(r.name).replace(/'/g,"\\'")+'\','+r.id+',\''+r.cat+'\',\''+(r.img||'').replace(/'/g,"\\'")+'\')">'
         +(r.img?'<img src="'+r.img+'" style="width:20px;height:20px;image-rendering:pixelated;border-radius:3px">':'')
         +'<span>'+r.name+'</span>'
         +(r.level?'<span style="font-size:.55rem;color:var(--overlay0);margin-left:auto">Niv.'+r.level+'</span>':'')
@@ -3198,26 +3202,26 @@ function craftItemAutocomplete(val){
   });
 }
 
-function selectCraftItem(name, ankId, category){
+function selectCraftItem(name, ankId, category, img){
   craftData.name = name;
+  craftData.img = img || '';
   document.getElementById('craftItemName').value = name;
   document.getElementById('craftItemSuggestions').style.display = 'none';
   // Try to fetch recipe from API
   if(ankId && category){
     fetchCraftRecipe(ankId, category);
+  } else {
+    renderCrafteur();
   }
 }
 
 function fetchCraftRecipe(ankId, category){
-  // Try equipment first, then consumables, then resources
   var urls = [
     'https://api.dofusdu.de/dofus3/v1/fr/items/equipment/'+ankId,
     'https://api.dofusdu.de/dofus3/v1/fr/items/consumables/'+ankId,
     'https://api.dofusdu.de/dofus3/v1/fr/items/resources/'+ankId
   ];
-  // Try category-specific URL first
-  if(category === 'equipment') urls = [urls[0], urls[1], urls[2]];
-  else if(category === 'consumables') urls = [urls[1], urls[0], urls[2]];
+  if(category === 'consumables') urls = [urls[1], urls[0], urls[2]];
   else if(category === 'resources') urls = [urls[2], urls[0], urls[1]];
 
   function tryUrl(i){
@@ -3226,15 +3230,33 @@ function fetchCraftRecipe(ankId, category){
       if(!r.ok) throw new Error('not found');
       return r.json();
     }).then(function(data){
+      console.log('Craft API recipe:', JSON.stringify((data&&data.recipe)||[]).substring(0,800));
+      // Update item image if available
+      if(data && data.image_urls){
+        craftData.img = data.image_urls.icon || data.image_urls.sd || craftData.img || '';
+      }
       if(data && data.recipe && data.recipe.length > 0){
-        craftData.resources = data.recipe.map(function(ing){
-          var itemData = ing.item || {};
-          var name = (typeof itemData.name === 'string') ? itemData.name : (itemData.name && itemData.name.fr) || '';
-          var img = (itemData.image_urls && itemData.image_urls.icon) || '';
-          return { name: name, qty: ing.quantity || 1, price: 0, img: img };
+        // Recipe items have item_ankama_id, item_subtype, quantity
+        // We need to fetch each resource's name
+        var ingredients = data.recipe;
+        var fetches = ingredients.map(function(ing){
+          var subtype = ing.item_subtype || 'resources';
+          var ingId = ing.item_ankama_id;
+          if(!ingId) return Promise.resolve({name:'?', qty:ing.quantity||1, price:0});
+          return fetch('https://api.dofusdu.de/dofus3/v1/fr/items/'+subtype+'/'+ingId)
+            .then(function(r){ return r.ok ? r.json() : null; })
+            .then(function(d){
+              if(!d) return {name:'Item #'+ingId, qty:ing.quantity||1, price:0};
+              var nm = typeof d.name === 'string' ? d.name : (d.name && d.name.fr) || d.name || 'Item #'+ingId;
+              var img = (d.image_urls && (d.image_urls.icon || d.image_urls.sd)) || '';
+              return {name:nm, qty:ing.quantity||1, price:0, img:img};
+            }).catch(function(){ return {name:'Item #'+ingId, qty:ing.quantity||1, price:0}; });
         });
-        renderCrafteur();
-        toast('📜 Recette chargée — '+craftData.resources.length+' ingrédients');
+        Promise.all(fetches).then(function(resources){
+          craftData.resources = resources;
+          renderCrafteur();
+          toast('📜 Recette chargée — '+resources.length+' ingrédients');
+        });
       } else {
         tryUrl(i+1);
       }
@@ -3298,7 +3320,7 @@ function deleteCraft(i){
 }
 
 function resetCraft(){
-  craftData = { name:'', resources:[], sellHDV:0, sellFinal:0 };
+  craftData = { name:'', resources:[], sellHDV:0, sellFinal:0, img:'' };
   renderCrafteur();
 }
 
